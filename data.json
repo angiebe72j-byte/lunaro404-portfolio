@@ -1,0 +1,50 @@
+[
+    {
+        "id": "2",
+        "title": "Restaurante",
+        "artist": "Comida",
+        "bgColor": "#81620e",
+        "shazams": "9.246.488",
+        "videoUrl": "uploads/1787958249612-85178895.mp4"
+    },
+    {
+        "id": "5",
+        "title": "Acoustic Vibes",
+        "artist": "The Indíes",
+        "bgColor": "#188a8c",
+        "shazams": "345.678",
+        "videoUrl": "uploads/1787955130443-514892351.mp4"
+    },
+    {
+        "id": "4",
+        "title": "Techno Beats",
+        "artist": "DJ XYZ",
+        "bgColor": "#173b32",
+        "shazams": "890.123",
+        "videoUrl": "uploads/1787965786286-689155578.mp4"
+    },
+    {
+        "id": "1787958311463",
+        "title": "Shop",
+        "artist": "xdxd",
+        "bgColor": "#000000",
+        "shazams": "xdxd",
+        "videoUrl": "uploads/1787958311275-153287418.mp4"
+    },
+    {
+        "id": "6",
+        "title": "Lo-fi Chill",
+        "artist": "Study Beats",
+        "bgColor": "#4f4617",
+        "shazams": "2.109.876",
+        "videoUrl": "uploads/1787955141685-348037647.mp4"
+    },
+    {
+        "id": "7",
+        "title": "Rock Anthem",
+        "artist": "The Guitars",
+        "bgColor": "#b74ea5",
+        "shazams": "6.789.012",
+        "videoUrl": "uploads/1787955153791-660408074.mp4"
+    }
+]

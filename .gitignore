@@ -1,0 +1,8 @@
+node_modules/
+server.log
+netstat_output.txt
+.DS_Store
+
+# Los videos pesan mucho y los administras seguido desde el panel admin;
+# en producción viven en el disco persistente de Render, no en git.
+uploads/

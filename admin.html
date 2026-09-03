@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUNARO404 - Panel de Administración</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos específicos para el panel */
+        body {
+            --dynamic-bg: #050a12;
+            padding-top: 100px; /* Espacio para el navbar */
+            padding-bottom: 50px;
+        }
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            align-items: start;
+            gap: 30px;
+        }
+        .admin-sidebar {
+            position: sticky;
+            top: 100px;
+        }
+        #previewCard {
+            scroll-margin-top: 90px;
+        }
+        .admin-main {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            min-width: 0; /* Evita que la tabla empuje el ancho de la columna */
+        }
+        @media (max-width: 900px) {
+            .admin-container {
+                grid-template-columns: 1fr;
+            }
+            .admin-sidebar {
+                position: static;
+            }
+        }
+        .admin-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+        }
+        .admin-title {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+        .admin-subtitle {
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 4px;
+        }
+        .admin-card-header {
+            margin-bottom: 26px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #4da6ff;
+        }
+        .submit-btn {
+            width: 100%;
+            background: #4da6ff;
+            color: #050a12;
+            border: none;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .submit-btn:hover {
+            background: #2a8bf2;
+            transform: translateY(-2px);
+        }
+        /* Tabla */
+        .projects-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .projects-table th, .projects-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .projects-table th {
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+        .projects-table td {
+            font-size: 15px;
+        }
+        .action-btn {
+            background: rgba(255, 60, 60, 0.1);
+            color: #ff4d4d;
+            border: 1px solid rgba(255, 60, 60, 0.2);
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .action-btn:hover {
+            background: rgba(255, 60, 60, 0.2);
+        }
+        .edit-btn {
+            background: rgba(77, 166, 255, 0.1);
+            color: #4da6ff;
+            border: 1px solid rgba(77, 166, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-right: 5px;
+        }
+        .edit-btn:hover {
+            background: rgba(77, 166, 255, 0.2);
+        }
+        .cancel-btn {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            width: 100%;
+            display: none;
+        }
+        .cancel-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        /* Botón de subir archivo personalizado */
+        .file-upload {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1.5px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        .file-upload:hover {
+            border-color: #4da6ff;
+            background: rgba(77, 166, 255, 0.06);
+        }
+        .file-upload-icon {
+            width: 38px;
+            height: 38px;
+            flex-shrink: 0;
+            border-radius: 10px;
+            background: rgba(77, 166, 255, 0.12);
+            color: #4da6ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .file-upload-icon svg { width: 18px; height: 18px; }
+        .file-upload-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.85);
+        }
+        .file-upload-filename {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #mediaFile {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Arrastrar y soltar para reordenar */
+        .drag-handle {
+            cursor: grab;
+            color: rgba(255,255,255,0.3);
+            width: 20px;
+            text-align: center;
+            user-select: none;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+        .projects-table tr[draggable="true"] {
+            transition: opacity 0.2s, background 0.2s;
+        }
+        .projects-table tr.is-dragging {
+            opacity: 0.4;
+        }
+        .projects-table tr.drag-over-top {
+            box-shadow: inset 0 2px 0 0 #4da6ff;
+        }
+        .projects-table tr.drag-over-bottom {
+            box-shadow: inset 0 -2px 0 0 #4da6ff;
+        }
+
+        /* Video en miniatura dentro de la tabla */
+        .table-video-thumb {
+            width: 90px;
+            height: 54px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: rgba(255,255,255,0.05);
+            display: block;
+        }
+        .table-video-empty {
+            width: 90px;
+            height: 54px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.03);
+            border: 1px dashed rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: rgba(255,255,255,0.3);
+            text-align: center;
+        }
+
+        /* Modal de confirmación */
+        .confirm-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 10, 18, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        .confirm-overlay.is-open {
+            display: flex;
+        }
+        .confirm-box {
+            width: 100%;
+            max-width: 360px;
+            background: #0d1420;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+            text-align: center;
+            animation: confirmPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes confirmPop {
+            from { opacity: 0; transform: scale(0.92) translateY(8px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .confirm-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .confirm-icon svg { width: 24px; height: 24px; }
+        .confirm-title {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .confirm-message {
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+        .confirm-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .confirm-actions button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .confirm-cancel {
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.7);
+        }
+        .confirm-cancel:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .confirm-accept {
+            color: #050a12;
+        }
+        .confirm-accept:hover {
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar" style="background: rgba(5,10,18,0.9); padding: 15px 40px; position: fixed; top: 0; width: 100%;">
+        <div class="logo">
+            <span class="logo-text">LUNARO<span class="logo-highlight">404</span></span>
+        </div>
+        <div class="nav-actions">
+            <a href="index.html" class="apple-music-btn" style="text-decoration: none;">Ver Sitio Web</a>
+        </div>
+    </nav>
+
+    <div class="admin-container">
+        <!-- Formulario -->
+        <div class="admin-sidebar">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h2 class="admin-title" id="formTitle">Agregar Proyecto</h2>
+                    <p class="admin-subtitle">Completa los datos y sube el video de tu diseño</p>
+                </div>
+                <form id="addProjectForm">
+                    <input type="hidden" id="editId" value="">
+                    <div class="form-group">
+                        <label>Nombre del Proyecto</label>
+                        <input type="text" class="form-control" id="title" required placeholder="Ej: Restaurante Kenshō">
+                    </div>
+                    <div class="form-group">
+                        <label>Cliente</label>
+                        <input type="text" class="form-control" id="artist" required placeholder="Ej: Kenshō Sushi Bar">
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría del Proyecto</label>
+                        <input type="text" class="form-control" id="shazams" placeholder="Ej: E-commerce, Restaurante, Landing Page" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Color de Acento</label>
+                        <input type="color" class="form-control" id="bgColor" value="#0e1e2d" style="height: 50px; padding: 5px;">
+                    </div>
+
+                    <input type="hidden" id="mediaType" value="file">
+                    <div class="form-group" id="fileInputGroup">
+                        <label>Video del Diseño</label>
+                        <label class="file-upload" for="mediaFile">
+                            <span class="file-upload-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            </span>
+                            <span>
+                                <span class="file-upload-text" id="fileUploadText">Seleccionar video</span>
+                                <span class="file-upload-filename" id="fileUploadFilename">MP4 o WEBM</span>
+                            </span>
+                        </label>
+                        <input type="file" id="mediaFile" accept="video/mp4,video/webm">
+                        <small id="fileHelperText" style="display: block; margin-top: 6px; color: rgba(255,255,255,0.4); font-size: 12px;">Sube una grabación corta mostrando el sitio (formato .mp4 o .webm)</small>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">Guardar Proyecto</button>
+                    <button type="button" class="cancel-btn" id="cancelEditBtn">Cancelar Edición</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Columna principal: vista previa + lista -->
+        <div class="admin-main">
+            <!-- Vista Previa -->
+            <div class="admin-card" id="previewCard">
+                <div class="admin-card-header">
+                    <h2 class="admin-title">Vista Previa</h2>
+                    <p class="admin-subtitle">Así se verá la tarjeta en tu portafolio</p>
+                </div>
+                <div style="max-width: 420px;">
+                    <div id="previewCell" style="border-radius: 28px; overflow: hidden; padding: 20px; display: flex; flex-direction: column; box-shadow: 0 15px 35px rgba(0,0,0,0.4); transition: background-color 0.3s;">
+                        <div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 16px; position: relative; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;">
+                            <video id="previewVideo" style="width: 100%; height: 100%; object-fit: cover; display: none;" muted loop autoplay playsinline></video>
+                            <span id="previewNoVideo" style="color: rgba(255,255,255,0.35); font-size: 13px;">Sin video aún</span>
+                        </div>
+                        <div class="cell-info" style="padding-top: 15px;">
+                            <div class="cell-title" id="previewTitle">Nombre del Proyecto</div>
+                            <div class="cell-artist" id="previewArtist">Cliente</div>
+                            <div class="cell-footer">
+                                <div class="cell-stats" id="previewCategory">Categoría</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h2 class="admin-title">Proyectos Actuales</h2>
+                    <p class="admin-subtitle">Todos los proyectos publicados en tu portafolio</p>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="projects-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Video</th>
+                                <th>Proyecto</th>
+                                <th>Cliente</th>
+                                <th>Color</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="projectsTableBody">
+                            <!-- Llenado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación reutilizable -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-box">
+            <div class="confirm-icon" id="confirmIcon"></div>
+            <div class="confirm-title" id="confirmTitle">¿Estás seguro?</div>
+            <div class="confirm-message" id="confirmMessage"></div>
+            <div class="confirm-actions">
+                <button class="confirm-cancel" id="confirmCancelBtn">Cancelar</button>
+                <button class="confirm-accept" id="confirmAcceptBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

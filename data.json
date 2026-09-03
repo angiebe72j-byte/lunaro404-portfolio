@@ -5,7 +5,8 @@
         "artist": "Comida",
         "bgColor": "#81620e",
         "shazams": "9.246.488",
-        "videoUrl": "uploads/1788403796236-720938895.mp4"
+        "videoUrl": "https://res.cloudinary.com/nxogwpqi/video/upload/v1788472519/lunaro404/d4prithfgubravimtljf.mp4",
+        "mediaPublicId": "lunaro404/d4prithfgubravimtljf"
     },
     {
         "id": "5",
@@ -13,7 +14,8 @@
         "artist": "The Indíes",
         "bgColor": "#188a8c",
         "shazams": "345.678",
-        "videoUrl": "uploads/1788404135724-721835136.mp4"
+        "videoUrl": "https://res.cloudinary.com/nxogwpqi/video/upload/v1788472524/lunaro404/cjhni4l3ud9u1dntjnw2.mp4",
+        "mediaPublicId": "lunaro404/cjhni4l3ud9u1dntjnw2"
     },
     {
         "id": "4",
@@ -21,7 +23,8 @@
         "artist": "DJ XYZ",
         "bgColor": "#173b32",
         "shazams": "890.123",
-        "videoUrl": "uploads/1787965786286-689155578.mp4"
+        "videoUrl": "https://res.cloudinary.com/nxogwpqi/video/upload/v1788472528/lunaro404/t01wbjz2vix0syvjqyho.mp4",
+        "mediaPublicId": "lunaro404/t01wbjz2vix0syvjqyho"
     },
     {
         "id": "1787958311463",
@@ -29,7 +32,8 @@
         "artist": "xdxd",
         "bgColor": "#000000",
         "shazams": "xdxd",
-        "videoUrl": "uploads/1788404428258-341799896.mp4"
+        "videoUrl": "https://res.cloudinary.com/nxogwpqi/video/upload/v1788472531/lunaro404/sl18jup9cdh7po9o209l.mp4",
+        "mediaPublicId": "lunaro404/sl18jup9cdh7po9o209l"
     },
     {
         "id": "6",
@@ -37,7 +41,8 @@
         "artist": "Study Beats",
         "bgColor": "#4f4617",
         "shazams": "2.109.876",
-        "videoUrl": "uploads/1787955141685-348037647.mp4"
+        "videoUrl": "https://res.cloudinary.com/nxogwpqi/video/upload/v1788472537/lunaro404/untposejhgdf1kfamynm.mp4",
+        "mediaPublicId": "lunaro404/untposejhgdf1kfamynm"
     },
     {
         "id": "7",
@@ -45,6 +50,7 @@
         "artist": "The Guitars",
         "bgColor": "#b74ea5",
         "shazams": "6.789.012",
-        "videoUrl": "uploads/1787955153791-660408074.mp4"
+        "videoUrl": "https://res.cloudinary.com/nxogwpqi/video/upload/v1788472539/lunaro404/wtm5ns9hgwaznefxsae2.mp4",
+        "mediaPublicId": "lunaro404/wtm5ns9hgwaznefxsae2"
     }
 ]

@@ -64,8 +64,8 @@ function initRoulette() {
             `;
         } else if (data.videoUrl) {
             mediaHtml = `
-                <div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 16px; position: relative; background: #000; cursor: pointer;" onclick="openVideoModal('${data.videoUrl}')">
-                    <video src="${data.videoUrl}" style="width: 100%; height: 100%; object-fit: cover;" autoplay loop muted playsinline></video>
+                <div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 16px; position: relative; background: ${data.bgColor}; cursor: pointer;" onclick="openVideoModal('${data.videoUrl}')">
+                    <video class="cell-video" src="${data.videoUrl}" style="width: 100%; height: 100%; object-fit: cover;" autoplay loop muted playsinline></video>
                     <div style="position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.1); transition: background 0.3s;" onmouseover="this.style.background='rgba(0,0,0,0.4)'" onmouseout="this.style.background='rgba(0,0,0,0.1)'">
                         <svg viewBox="0 0 24 24" fill="white" style="width: 50px; height: 50px; opacity: 0.8; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));"><path d="M8 5v14l11-7z"/></svg>
                     </div>
@@ -92,6 +92,18 @@ function initRoulette() {
             </div>
         `;
         carousel.appendChild(cell);
+
+        // Si el video no es panorámico (cuadrado, vertical, etc.), mostrarlo
+        // completo en vez de recortarlo para llenar el marco 16:9
+        const cellVideo = cell.querySelector('.cell-video');
+        if (cellVideo) {
+            cellVideo.addEventListener('loadedmetadata', () => {
+                const aspect = cellVideo.videoWidth / cellVideo.videoHeight;
+                if (aspect < 1.55) { // 16/9 ≈ 1.78; por debajo de eso ya no es panorámico
+                    cellVideo.style.objectFit = 'contain';
+                }
+            });
+        }
 
         // Dot
         const dot = document.createElement('div');
@@ -227,18 +239,26 @@ window.addEventListener('scroll', () => {
     }
 });
 
+// Detecta celular real aunque el navegador tenga activado "Sitio de escritorio"
+// (que engaña el ancho de pantalla, pero no puede fingir que hay un mouse)
+function isMobileDevice() {
+    return window.matchMedia('(max-width: 768px)').matches ||
+        window.matchMedia('(hover: none) and (pointer: coarse) and (max-width: 1024px)').matches;
+}
+
 // Botón flotante de WhatsApp: en móvil, recién aparece cuando el usuario empieza a deslizar
 const fabContainer = document.querySelector('.fab-container');
 window.addEventListener('scroll', () => {
-    if (!window.matchMedia('(max-width: 768px)').matches) return;
+    if (!isMobileDevice()) return;
     fabContainer.classList.toggle('is-visible', window.scrollY > 50);
 });
 
 // Agregar modal de video global
 const modalHtml = `
-<div id="videoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,10,18,0.95); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(15px);">
-    <button onclick="closeVideoModal()" style="position: absolute; top: 30px; right: 40px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 50px; height: 50px; border-radius: 50%; font-size: 24px; cursor: pointer; transition: all 0.3s; display: flex; justify-content: center; align-items: center;">&times;</button>
-    <video id="modalVideo" style="max-width: 80%; max-height: 80%; border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);" controls autoplay playsinline></video>
+<div id="videoModal" class="video-modal">
+    <p class="video-modal-rotate-hint">📱 Gira tu celular para ver el video en pantalla completa</p>
+    <button onclick="closeVideoModal()" class="video-modal-close">&times;</button>
+    <video id="modalVideo" class="video-modal-video" controls autoplay playsinline></video>
 </div>
 `;
 document.body.insertAdjacentHTML('beforeend', modalHtml);
@@ -257,7 +277,51 @@ window.closeVideoModal = function() {
     modal.style.display = 'none';
     video.pause();
     video.src = '';
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
 }
+
+// En móvil: al girar el celular a horizontal con el modal de video abierto,
+// poner el video en pantalla completa automáticamente
+function requestVideoFullscreen(video) {
+    if (video.webkitEnterFullscreen) {
+        video.webkitEnterFullscreen(); // iOS Safari (solo funciona sobre el <video>)
+    } else if (video.requestFullscreen) {
+        video.requestFullscreen().catch(() => {});
+    } else if (video.webkitRequestFullscreen) {
+        video.webkitRequestFullscreen();
+    }
+}
+
+// Igual que isMobileDevice(), pero usando la dimensión más chica porque al
+// rotar el celular el ancho y alto se intercambian
+function isMobileScreen() {
+    return Math.min(window.innerWidth, window.innerHeight) <= 768 ||
+        window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+}
+
+const landscapeQuery = window.matchMedia('(orientation: landscape)');
+landscapeQuery.addEventListener('change', (e) => {
+    const modal = document.getElementById('videoModal');
+    const video = document.getElementById('modalVideo');
+    if (!isMobileScreen() || modal.style.display !== 'flex') return;
+
+    if (e.matches) {
+        requestVideoFullscreen(video); // Funciona directo en algunos navegadores
+    } else if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+    }
+});
+
+// Algunos navegadores exigen que el fullscreen lo dispare un toque directo del
+// usuario (no basta con el evento de rotación). Si eso pasa, tocar el video
+// estando en horizontal lo manda a pantalla completa como respaldo.
+document.getElementById('modalVideo').addEventListener('click', () => {
+    const modal = document.getElementById('videoModal');
+    const video = document.getElementById('modalVideo');
+    if (isMobileScreen() && landscapeQuery.matches && modal.style.display === 'flex' && !document.fullscreenElement) {
+        requestVideoFullscreen(video);
+    }
+});
 
 // Reveal on scroll: fade + slide-in moderno para las secciones
 function initScrollReveal() {

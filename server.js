@@ -3,6 +3,8 @@ const cors = require('cors');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,13 +19,13 @@ app.use(cors());
 app.use(express.json());
 // Serve static files from the root directory (html, css, js)
 app.use(express.static(__dirname));
-// Los videos/imágenes subidos se sirven desde DATA_DIR (persistente en producción)
-app.use('/uploads', express.static(uploadsDir));
 
 // Ensure uploads directory exists
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
 }
+// Los videos/imágenes subidos localmente (modo sin Cloudinary) se sirven desde aquí
+app.use('/uploads', express.static(uploadsDir));
 
 // Primer arranque sobre un disco persistente vacío: sembrar data.json desde el
 // que viene en el repo, para no partir con el portafolio vacío.
@@ -32,17 +34,72 @@ if (!fs.existsSync(DATA_FILE)) {
     fs.writeFileSync(DATA_FILE, fs.existsSync(seedFile) ? fs.readFileSync(seedFile) : '[]');
 }
 
-// Multer storage configuration for handling file uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, uploadsDir)
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
+// Si hay credenciales de Cloudinary configuradas, los videos/imágenes se suben
+// ahí (permanente, sobrevive a cualquier reinicio o redeploy). Si no, se guardan
+// en el disco local (uploadsDir), útil para desarrollo local sin cuenta configurada.
+const useCloudinary = !!(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET);
+
+let storage;
+if (useCloudinary) {
+    cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET
+    });
+    storage = new CloudinaryStorage({
+        cloudinary,
+        params: {
+            folder: 'lunaro404',
+            resource_type: 'auto' // detecta automáticamente si es video o imagen
+        }
+    });
+    console.log('Almacenamiento de medios: Cloudinary');
+} else {
+    storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, uploadsDir)
+        },
+        filename: function (req, file, cb) {
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+            cb(null, uniqueSuffix + path.extname(file.originalname));
+        }
+    });
+    console.log('Almacenamiento de medios: disco local (sin credenciales de Cloudinary)');
+}
 const upload = multer({ storage: storage });
+
+// A partir del archivo subido (por multer/Cloudinary o local), arma la URL
+// pública a guardar y, si aplica, el public_id de Cloudinary para poder borrarlo después
+function buildMediaFromFile(file) {
+    const isVideo = file.mimetype.startsWith('video/');
+    if (useCloudinary) {
+        return {
+            url: file.path, // Cloudinary ya da la URL segura completa (https://res.cloudinary.com/...)
+            publicId: file.filename, // public_id asignado por Cloudinary, necesario para borrar
+            isVideo
+        };
+    }
+    return {
+        url: 'uploads/' + file.filename,
+        publicId: null,
+        isVideo
+    };
+}
+
+// Borra un archivo anterior, ya sea de Cloudinary o del disco local, según corresponda
+function deleteOldMedia(face) {
+    if (face.mediaPublicId) {
+        const resourceType = face.videoUrl ? 'video' : 'image';
+        cloudinary.uploader.destroy(face.mediaPublicId, { resource_type: resourceType }, () => {});
+        return;
+    }
+    if (face.image && face.image.startsWith('uploads/')) {
+        fs.unlink(path.join(DATA_DIR, face.image), () => {});
+    }
+    if (face.videoUrl && face.videoUrl.startsWith('uploads/')) {
+        fs.unlink(path.join(DATA_DIR, face.videoUrl), () => {});
+    }
+}
 
 // API to get all faces
 app.get('/api/faces', (req, res) => {
@@ -92,14 +149,14 @@ app.put('/api/faces/:id', upload.single('mediaFile'), (req, res) => {
 
     fs.readFile(DATA_FILE, 'utf8', (err, data) => {
         if (err) return res.status(500).json({ error: 'Failed to read data' });
-        
+
         let faces = JSON.parse(data);
         const faceIndex = faces.findIndex(f => f.id === idToUpdate);
-        
+
         if (faceIndex === -1) {
             return res.status(404).json({ error: 'Face not found' });
         }
-        
+
         const existingFace = faces[faceIndex];
         const updatedFace = {
             id: existingFace.id,
@@ -111,25 +168,20 @@ app.put('/api/faces/:id', upload.single('mediaFile'), (req, res) => {
 
         if (mediaType === 'file') {
             if (req.file) {
-                // Remove old file if it existed
-                if (existingFace.image && existingFace.image.startsWith('uploads/')) {
-                    fs.unlink(path.join(DATA_DIR, existingFace.image), () => {});
-                }
-                if (existingFace.videoUrl && existingFace.videoUrl.startsWith('uploads/')) {
-                    fs.unlink(path.join(DATA_DIR, existingFace.videoUrl), () => {});
-                }
+                deleteOldMedia(existingFace);
 
-                // Set new file
-                const fileUrl = 'uploads/' + req.file.filename;
-                if (req.file.mimetype.startsWith('video/')) {
-                    updatedFace.videoUrl = fileUrl;
+                const media = buildMediaFromFile(req.file);
+                if (media.isVideo) {
+                    updatedFace.videoUrl = media.url;
                 } else {
-                    updatedFace.image = fileUrl;
+                    updatedFace.image = media.url;
                 }
+                if (media.publicId) updatedFace.mediaPublicId = media.publicId;
             } else if (keepExistingFile === 'true') {
                 // Keep the existing file properties
                 if (existingFace.videoUrl) updatedFace.videoUrl = existingFace.videoUrl;
                 if (existingFace.image) updatedFace.image = existingFace.image;
+                if (existingFace.mediaPublicId) updatedFace.mediaPublicId = existingFace.mediaPublicId;
             }
         } else if (mediaType === 'iframe') {
             updatedFace.iframeUrl = externalUrl;
@@ -139,16 +191,9 @@ app.put('/api/faces/:id', upload.single('mediaFile'), (req, res) => {
             updatedFace.image = externalUrl;
         }
 
-        // Clean up old files if media type was changed and old media was a file
-        if (mediaType !== 'file' || (mediaType === 'file' && req.file)) {
-             if (mediaType !== 'file') {
-                if (existingFace.image && existingFace.image.startsWith('uploads/')) {
-                    fs.unlink(path.join(DATA_DIR, existingFace.image), () => {});
-                }
-                if (existingFace.videoUrl && existingFace.videoUrl.startsWith('uploads/')) {
-                    fs.unlink(path.join(DATA_DIR, existingFace.videoUrl), () => {});
-                }
-             }
+        // Clean up old files if media type was changed away from "file"
+        if (mediaType !== 'file') {
+            deleteOldMedia(existingFace);
         }
 
         faces[faceIndex] = updatedFace;
@@ -163,10 +208,10 @@ app.put('/api/faces/:id', upload.single('mediaFile'), (req, res) => {
 // API to add a new face
 app.post('/api/faces', upload.single('mediaFile'), (req, res) => {
     const { title, artist, bgColor, shazams, mediaType, externalUrl } = req.body;
-    
+
     fs.readFile(DATA_FILE, 'utf8', (err, data) => {
         if (err) return res.status(500).json({ error: 'Failed to read data' });
-        
+
         const faces = JSON.parse(data);
         const newFace = {
             id: Date.now().toString(),
@@ -177,13 +222,13 @@ app.post('/api/faces', upload.single('mediaFile'), (req, res) => {
         };
 
         if (mediaType === 'file' && req.file) {
-            // Uploaded file
-            const fileUrl = 'uploads/' + req.file.filename;
-            if (req.file.mimetype.startsWith('video/')) {
-                newFace.videoUrl = fileUrl;
+            const media = buildMediaFromFile(req.file);
+            if (media.isVideo) {
+                newFace.videoUrl = media.url;
             } else {
-                newFace.image = fileUrl;
+                newFace.image = media.url;
             }
+            if (media.publicId) newFace.mediaPublicId = media.publicId;
         } else if (mediaType === 'iframe') {
             newFace.iframeUrl = externalUrl;
         } else if (mediaType === 'video_url') {
@@ -206,27 +251,15 @@ app.delete('/api/faces/:id', (req, res) => {
     const idToDelete = req.params.id;
     fs.readFile(DATA_FILE, 'utf8', (err, data) => {
         if (err) return res.status(500).json({ error: 'Failed to read data' });
-        
+
         let faces = JSON.parse(data);
         const faceIndex = faces.findIndex(f => f.id === idToDelete);
-        
+
         if (faceIndex === -1) {
             return res.status(404).json({ error: 'Face not found' });
         }
-        
-        const face = faces[faceIndex];
-        
-        // Remove file if exists
-        if (face.image && face.image.startsWith('uploads/')) {
-            fs.unlink(path.join(DATA_DIR, face.image), (err) => {
-                if (err) console.error("Failed to delete image file", err);
-            });
-        }
-        if (face.videoUrl && face.videoUrl.startsWith('uploads/')) {
-            fs.unlink(path.join(DATA_DIR, face.videoUrl), (err) => {
-                if (err) console.error("Failed to delete video file", err);
-            });
-        }
+
+        deleteOldMedia(faces[faceIndex]);
 
         faces.splice(faceIndex, 1);
 

@@ -82,8 +82,11 @@ function initRoulette() {
                 <div class="cell-artist">${data.artist}</div>
                 <div class="cell-footer">
                     <div class="cell-stats">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11.666 4.544c-1.34-1.332-3.51-1.332-4.85 0-1.34 1.33-1.34 3.493 0 4.825l3.86 3.84c.67.666.67 1.745 0 2.413l-4.14 4.12"/><path d="M12.334 19.456c1.34 1.332 3.51 1.332 4.85 0 1.34-1.33 1.34-3.493 0-4.825l-3.86-3.84c-.67-.666-.67-1.745 0-2.413l4.14-4.12"/></svg>
-                        ${data.shazams}
+                        ${String(data.tech || data.shazams || '')
+                            .split(/\s*[·,|]\s*/)
+                            .filter(Boolean)
+                            .map(t => `<span class="tech-chip">${t}</span>`)
+                            .join('')}
                     </div>
                     <button class="share-btn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>

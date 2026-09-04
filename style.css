@@ -1480,3 +1480,22 @@ img.tech-logo:hover {
         padding: 44px 20px;
     }
 }
+
+/* --- El boton de WhatsApp del hero acompana el color de la ruleta --- */
+.hero-btn-primary {
+    /* Respaldo para navegadores sin color-mix */
+    background: #25D366;
+    color: #06301a;
+    box-shadow: none;
+    transition: background 0.6s ease, color 0.6s ease, transform 0.2s ease;
+}
+@supports (background: color-mix(in srgb, red 50%, white)) {
+    .hero-btn-primary {
+        /* Aclarado sobre el color activo, para que resalte contra el fondo */
+        background: color-mix(in srgb, var(--dynamic-bg, #1e534f) 38%, #ffffff);
+        color: color-mix(in srgb, var(--dynamic-bg, #1e534f) 78%, #000000);
+    }
+    .hero-btn-primary:hover {
+        background: color-mix(in srgb, var(--dynamic-bg, #1e534f) 20%, #ffffff);
+    }
+}

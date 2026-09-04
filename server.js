@@ -270,6 +270,39 @@ app.delete('/api/faces/:id', (req, res) => {
     });
 });
 
+// Ruta ligera para el auto-ping: responde sin leer archivos ni tocar disco.
+app.get('/salud', (req, res) => {
+    res.json({ ok: true, hora: new Date().toISOString() });
+});
+
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });
+
+// --- Auto-ping para que Render no apague la instancia ---
+// El plan gratuito de Render duerme el servicio tras 15 minutos sin trafico,
+// y despertarlo puede tardar 50 segundos o mas. Eso quema el presupuesto de
+// publicidad: el visitante que llega desde un anuncio ve una pantalla en
+// blanco y se va. Visitandonos cada 10 minutos, nunca se cumple ese plazo.
+//
+// Solo corre en produccion, cuando Render expone la URL publica en
+// RENDER_EXTERNAL_URL. En local no hace nada.
+const URL_PUBLICA = process.env.RENDER_EXTERNAL_URL;
+const INTERVALO_PING = 10 * 60 * 1000; // 10 minutos
+
+if (URL_PUBLICA) {
+    setInterval(async () => {
+        try {
+            const r = await fetch(`${URL_PUBLICA}/salud`);
+            console.log(`[auto-ping] ${r.status} ${new Date().toISOString()}`);
+        } catch (err) {
+            // Un ping fallido no debe tumbar el servidor: se reintenta solo
+            // en el siguiente ciclo.
+            console.warn('[auto-ping] fallo:', err.message);
+        }
+    }, INTERVALO_PING);
+
+    console.log(`[auto-ping] activo cada 10 min sobre ${URL_PUBLICA}`);
+} else {
+    console.log('[auto-ping] inactivo (sin RENDER_EXTERNAL_URL, entorno local)');
+}

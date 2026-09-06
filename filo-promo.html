@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>LUNARO — Barbería FILO</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+
+  html,body{width:100%;height:100%;overflow:hidden;background:#05070d}
+  #escenario{position:fixed;inset:0;background:#05070d;overflow:hidden}
+  #lienzo{position:absolute;width:1080px;height:1920px;transform-origin:top left;background:#05070d;overflow:hidden}
+
+
+  #lienzo{
+    width:1080px;
+    height:1920px;
+    background:#05070d;
+    font-family:Inter,system-ui,sans-serif;
+    color:#fff;
+    overflow:hidden;
+    position:relative;
+    transform-origin:top left;
+  }
+
+  /* fondo animado */
+  .glow{
+    position:absolute; inset:-20%;
+    background:
+      radial-gradient(circle at 25% 20%, #1b6b5f66 0%, transparent 45%),
+      radial-gradient(circle at 75% 80%, #7a4ea866 0%, transparent 45%),
+      radial-gradient(circle at 50% 50%, #0d3a5a55 0%, transparent 60%);
+    animation: drift 14s ease-in-out infinite alternate;
+  }
+  @keyframes drift{ to{ transform:translate(-4%, 3%) scale(1.12) } }
+
+  .grid{
+    position:absolute; inset:0;
+    background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);
+    background-size:60px 60px;
+  }
+
+  /* ---------- textos superiores ---------- */
+  .top{
+    position:absolute; top:110px; left:0; right:0;
+    text-align:center; z-index:5; padding:0 70px;
+  }
+  .linea{
+    position:absolute; left:70px; right:70px;
+    opacity:0; transform:translateY(30px);
+  }
+  .linea h1{
+    font-size:84px; font-weight:900; line-height:1.04;
+    letter-spacing:-2px; text-wrap:balance;
+  }
+  .linea p{
+    margin-top:22px; font-size:38px; font-weight:400;
+    color:#ffffffcc;
+  }
+  .acento{ color:#31d67f }
+
+  /* aparición de cada línea */
+  .l1{ animation: aparece 4.2s ease forwards .3s }
+  .l2{ animation: aparece 4.2s ease forwards 4.8s }
+  .l3{ animation: aparece 4.2s ease forwards 9.3s }
+  .l4{ animation: aparece 5.5s ease forwards 13.8s }
+
+  @keyframes aparece{
+    0%{opacity:0; transform:translateY(30px)}
+    12%{opacity:1; transform:translateY(0)}
+    82%{opacity:1; transform:translateY(0)}
+    100%{opacity:0; transform:translateY(-22px)}
+  }
+
+  /* ---------- celular ---------- */
+  .telefono{
+    position:absolute;
+    top:500px; left:50%; margin-left:-255px;
+    width:510px; height:1150px;
+    background:#0b0d12;
+    border-radius:56px;
+    padding:14px;
+    box-shadow:0 50px 120px #000c, 0 0 0 3px #2a2f3a, 0 0 90px #31d67f22;
+    z-index:4;
+    opacity:0;
+    animation: entraTel 1.1s cubic-bezier(.16,1,.3,1) forwards .25s;
+  }
+  @keyframes entraTel{
+    from{opacity:0; transform:translateY(70px) scale(.94)}
+    to{opacity:1; transform:none}
+  }
+  .notch{
+    position:absolute; top:26px; left:50%; margin-left:-58px;
+    width:116px; height:26px; background:#0b0d12; border-radius:14px; z-index:3;
+  }
+  .pantalla{
+    width:100%; height:100%;
+    border-radius:44px; overflow:hidden;
+    background:#000; position:relative;
+  }
+  /* la web real, escalada dentro del celular */
+  .pantalla iframe{
+    width:482px;
+    height:1122px;
+    border:0;
+    position:absolute; top:0; left:0;
+  }
+
+
+  /* brillo que barre la pantalla */
+  .brillo{
+    position:absolute; top:-40%; left:-60%;
+    width:80%; height:180%;
+    background:linear-gradient(100deg,transparent,#ffffff22,transparent);
+    transform:rotate(14deg);
+    animation: barre 3.4s ease-in-out infinite 2s;
+  }
+  @keyframes barre{ 0%{left:-60%} 55%,100%{left:130%} }
+
+  /* ---------- cierre ---------- */
+  .cierre{
+    position:absolute; inset:0; z-index:9;
+    background:radial-gradient(circle at 50% 45%, #0d2f26 0%, #05070d 70%);
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    gap:34px; opacity:0; pointer-events:none;
+    animation: cierreIn 1s ease forwards 19.2s;
+  }
+  @keyframes cierreIn{ to{opacity:1} }
+  .marca{
+    font-size:112px; font-weight:900; letter-spacing:-4px;
+  }
+  .marca span{ color:#31d67f }
+  .cierre .tag{ font-size:40px; color:#ffffffbb; text-align:center; line-height:1.35 }
+  .precio{
+    margin-top:10px;
+    font-size:64px; font-weight:900;
+    background:#31d67f; color:#052b1c;
+    padding:22px 56px; border-radius:999px;
+  }
+  .wa{
+    display:flex; align-items:center; gap:18px;
+    font-size:46px; font-weight:700; margin-top:8px;
+  }
+  .wa svg{ width:56px; height:56px; fill:#31d67f }
+  .dominio{ font-size:44px; color:#ffffff99; letter-spacing:1px }
+
+  /* barra de progreso */
+  .barra{
+    position:absolute; bottom:0; left:0; height:8px;
+    background:#31d67f; width:0; z-index:10;
+    animation: avanza 20s linear forwards;
+  }
+  @keyframes avanza{ to{width:100%} }
+</style>
+</head>
+<body>
+<div id="escenario"><div id="lienzo">
+  <div class="glow"></div>
+  <div class="grid"></div>
+
+  <div class="top">
+    <div class="linea l1">
+      <h1>¿Tu negocio todavía<br>no tiene <span class="acento">página web</span>?</h1>
+      <p>Tus clientes te están buscando ahora mismo</p>
+    </div>
+    <div class="linea l2">
+      <h1>Te la armo en<br><span class="acento">2 a 7 días</span></h1>
+      <p>Diseño a medida, sin plantillas</p>
+    </div>
+    <div class="linea l3">
+      <h1>Pensada para el<br><span class="acento">celular</span></h1>
+      <p>Ahí te ven 8 de cada 10 clientes</p>
+    </div>
+    <div class="linea l4">
+      <h1>Con botón de<br><span class="acento">WhatsApp</span></h1>
+      <p>Para que te escriban en un toque</p>
+    </div>
+  </div>
+
+  <div class="telefono">
+    <div class="notch"></div>
+    <div class="pantalla">
+      <iframe src="filo/index.html" scrolling="no" title="Barbería FILO"></iframe>
+      <div class="brillo"></div>
+    </div>
+  </div>
+
+  <div class="cierre">
+    <div class="marca">LUNA<span>RO</span></div>
+    <div class="tag">Páginas web a medida para tu negocio</div>
+    <div class="precio">Desde S/300</div>
+    <div class="wa">
+      <svg viewBox="0 0 32 32"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.3.7 4.5 1.8 6.3L4 29l7.9-1.8c1.7.9 3.7 1.4 5.7 1.4h.4C24.6 28.6 30 23.2 30 16.6S24.6 3 18 3h-2z"/></svg>
+      935 611 505
+    </div>
+    <div class="dominio">lunaro404.com</div>
+  </div>
+
+  <div class="barra"></div>
+</div></div>
+<script>
+function ajustar(){var l=document.getElementById("lienzo");var e=Math.min(innerWidth/1080, innerHeight/1920);l.style.transform="scale("+e+")";l.style.left=((innerWidth-1080*e)/2)+"px";l.style.top=((innerHeight-1920*e)/2)+"px";}
+addEventListener("resize",ajustar);ajustar();
+</script>
+
+<script>
+(function(){
+  var f=document.querySelector('.pantalla iframe');
+  var INICIO=5000, DUR=13800, ALTO_VISIBLE=1122;   // arranca a 1.8s, dura 17s
+  function easing(t){ var v = t<.08 ? (t*t)/0.16 : t-0.04; return v/0.96; }
+  function correr(){
+    var d=f.contentDocument;
+    if(!d){ return; }
+    // desactiva el scroll suave del sitio para que la animacion sea pareja
+    d.documentElement.style.scrollBehavior='auto';
+    d.body.style.scrollBehavior='auto';
+    var total=Math.max(0, d.body.scrollHeight - 1122);
+    var t0=null;
+    function paso(ts){
+      if(!t0) t0=ts;
+      var p=Math.min(1,(ts-t0)/DUR);
+      f.contentWindow.scrollTo(0, easing(p)*total);
+      if(p<1) requestAnimationFrame(paso);
+    }
+    requestAnimationFrame(paso);
+  }
+  if(f.contentDocument && f.contentDocument.readyState==='complete'){ setTimeout(correr, INICIO); }
+  else { f.addEventListener('load', function(){ setTimeout(correr, INICIO); }); }
+})();
+</script>
+</body>
+</html>

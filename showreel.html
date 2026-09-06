@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>LUNARO — Showreel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#05070d}
+  #escenario{position:fixed;inset:0;background:#05070d;overflow:hidden}
+  #lienzo{
+    position:absolute;width:1080px;height:1920px;
+    transform-origin:top left;overflow:hidden;
+    background:#05070d;color:#fff;
+    font-family:Inter,system-ui,sans-serif;
+  }
+
+  /* fondo que toma el color del proyecto activo */
+  #tinte{
+    position:absolute; inset:-25%;
+    background:radial-gradient(circle at 50% 38%, var(--c,#14332c) 0%, transparent 62%);
+    opacity:.85; transition:background 1.1s ease;
+  }
+  #grid{
+    position:absolute; inset:0;
+    background-image:linear-gradient(#ffffff09 1px,transparent 1px),linear-gradient(90deg,#ffffff09 1px,transparent 1px);
+    background-size:64px 64px;
+  }
+
+  /* ---------- encabezado ---------- */
+  .head{position:absolute; top:120px; left:70px; right:70px; text-align:center; z-index:6}
+  .kicker{
+    font-size:26px; font-weight:800; letter-spacing:6px;
+    color:#31d67f; text-transform:uppercase; margin-bottom:20px;
+  }
+  .head h1{font-size:78px; font-weight:900; line-height:1.05; letter-spacing:-2px}
+
+  /* ---------- ventana con el video ---------- */
+  .marco{
+    position:absolute; top:430px; left:60px; right:60px;
+    border-radius:26px; overflow:hidden;
+    background:#0b0d12;
+    box-shadow:0 40px 110px #000c, 0 0 0 2px #ffffff1a;
+    z-index:5;
+  }
+  .barraTop{
+    height:64px; background:#141821; display:flex; align-items:center;
+    padding:0 26px; gap:14px;
+  }
+  .punto{width:16px;height:16px;border-radius:50%}
+  .url{
+    flex:1; margin-left:14px; height:36px; border-radius:18px;
+    background:#0b0d12; color:#8b93a3; font-size:20px;
+    display:flex; align-items:center; padding:0 20px;
+  }
+  .videoBox{position:relative; width:100%; aspect-ratio:16/9; background:#000}
+  .videoBox video{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; opacity:0; z-index:1; transition:opacity .5s ease;
+  }
+  .videoBox video.on{opacity:1; z-index:2}
+  .brillo{
+    position:absolute; top:-40%; left:-60%; width:70%; height:180%;
+    background:linear-gradient(100deg,transparent,#ffffff1f,transparent);
+    transform:rotate(14deg); animation:barre 3.6s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes barre{0%{left:-60%}55%,100%{left:130%}}
+
+  /* ---------- datos del proyecto ---------- */
+  .info{position:absolute; top:1210px; left:70px; right:70px; text-align:center; z-index:6}
+  #nombre{
+    font-size:88px; font-weight:900; letter-spacing:-2px; line-height:1.05;
+    transition:opacity .4s ease;
+  }
+  #rubro{margin-top:16px; font-size:36px; color:#ffffffcc; transition:opacity .4s ease}
+  #chips{
+    margin-top:30px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap;
+  }
+  #chips span{
+    padding:12px 26px; border-radius:999px;
+    background:#ffffff14; border:1px solid #ffffff26;
+    font-size:26px; font-weight:700;
+  }
+  #contador{
+    position:absolute; top:1560px; left:0; right:0; text-align:center;
+    font-size:28px; font-weight:700; color:#ffffff66; letter-spacing:4px; z-index:6;
+  }
+
+  /* ---------- cierre ---------- */
+  #cierre{
+    position:absolute; inset:0; z-index:9; opacity:0; pointer-events:none;
+    background:radial-gradient(circle at 50% 45%, #0d3226 0%, #05070d 72%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:34px;
+    transition:opacity .8s ease;
+  }
+  #cierre.on{opacity:1}
+  .marca{font-size:118px; font-weight:900; letter-spacing:-5px}
+  .marca span{color:#31d67f}
+  .tag{font-size:40px; color:#ffffffcc; text-align:center; line-height:1.4}
+  .precio{
+    font-size:66px; font-weight:900; background:#31d67f; color:#04301f;
+    padding:24px 60px; border-radius:999px; margin-top:6px;
+  }
+  .wa{font-size:48px; font-weight:800; margin-top:10px}
+  .dom{font-size:42px; color:#ffffff99; letter-spacing:1px}
+
+  .barra{position:absolute;bottom:0;left:0;height:9px;background:#31d67f;width:0;z-index:10}
+</style>
+</head>
+<body>
+<div id="escenario"><div id="lienzo">
+  <div id="tinte"></div>
+  <div id="grid"></div>
+
+  <div class="head">
+    <div class="kicker">Diseño web profesional</div>
+    <h1 id="titulo">Webs que hacen<br>que te escriban</h1>
+  </div>
+
+  <div class="marco">
+    <div class="barraTop">
+      <div class="punto" style="background:#ff5f57"></div>
+      <div class="punto" style="background:#febc2e"></div>
+      <div class="punto" style="background:#28c840"></div>
+      <div class="url" id="url">lunaro404.com</div>
+    </div>
+    <div class="videoBox" id="box"><div class="brillo"></div></div>
+  </div>
+
+  <div class="info">
+    <div id="nombre">—</div>
+    <div id="rubro">—</div>
+    <div id="chips"></div>
+  </div>
+  <div id="contador">01 / 06</div>
+
+  <div id="cierre">
+    <div class="marca">LUNA<span>RO</span></div>
+    <div class="tag">Páginas web a medida<br>Entrega en 2 a 7 días</div>
+    <div class="precio">Desde S/300</div>
+    <div class="wa">📲 935 611 505</div>
+    <div class="dom">lunaro404.com</div>
+  </div>
+
+  <div class="barra" id="barra"></div>
+</div></div>
+
+<script>
+const BASE = "https://res.cloudinary.com/nxogwpqi/video/upload/";
+const PROYECTOS = [
+  {n:"Kenshō",            r:"Restaurante · carta y reservas online",      t:["HTML","CSS","JavaScript"], c:"#7a5c12", v:"v1788472519/lunaro404/d4prithfgubravimtljf.mp4"},
+  {n:"Sonrisa Elite",     r:"Clínica dental · captación de pacientes",    t:["HTML","CSS","JavaScript"], c:"#0f7d80", v:"v1788472524/lunaro404/cjhni4l3ud9u1dntjnw2.mp4"},
+  {n:"AETHER",            r:"Tienda de ropa · catálogo de temporada",     t:["React","Tailwind"],        c:"#14332c", v:"v1788472528/lunaro404/t01wbjz2vix0syvjqyho.mp4"},
+  {n:"iStore",            r:"E-commerce · tienda de tecnología",          t:["React","Node.js"],         c:"#1a1a1a", v:"v1788472531/lunaro404/sl18jup9cdh7po9o209l.mp4"},
+  {n:"Aura Construcciones",r:"Constructora · proyectos y contacto",       t:["HTML","CSS","JavaScript"], c:"#2f4356", v:"v1788472537/lunaro404/untposejhgdf1kfamynm.mp4"},
+  {n:"La Panadería",      r:"Panadería · tienda online con carrito",     t:["React","Node.js"],         c:"#7a3f5c", v:"v1788472539/lunaro404/wtm5ns9hgwaznefxsae2.mp4"},
+  {n:"Barbería",           r:"Barbería · reservas y galería de cortes", t:["HTML","CSS","JavaScript"], c:"#1f2b38", local:"/barberia.mp4"}
+];
+
+const SEG = 2800;                    // duración de cada proyecto
+const TOTAL = SEG*PROYECTOS.length + 3000;
+
+const box=document.getElementById('box');
+const lienzo=document.getElementById('lienzo');
+const videos=[];
+
+// precarga todos los videos
+PROYECTOS.forEach((p,i)=>{
+  const v=document.createElement('video');
+  v.src = p.local ? p.local : (BASE+p.v); v.muted=true; v.loop=true; v.playsInline=true; v.preload='auto';
+  box.insertBefore(v, box.firstChild);
+  videos.push(v);
+});
+
+const TITULOS=[
+  "Webs que hacen<br>que te escriban",
+  "Cada negocio,<br>su propio diseño",
+  "Hechas para<br>vender, no adornar",
+  "Listas para<br>cobrar online",
+  "Tu trabajo,<br>bien presentado",
+  "Hasta el barrio<br>se ve premium",
+  "Y la tuya,<br>¿cuándo?"
+];
+
+function mostrar(i){
+  const p=PROYECTOS[i];
+  lienzo.style.setProperty('--c', p.c);
+  videos.forEach(v=>v.classList.remove('on'));
+  const v=videos[i];
+  v.classList.add('on');
+  try{ v.currentTime=0; v.play(); }catch(e){}
+  document.getElementById('titulo').innerHTML=TITULOS[i];
+  document.getElementById('nombre').textContent=p.n;
+  document.getElementById('rubro').textContent=p.r;
+  document.getElementById('url').textContent="lunaro404.com";
+  document.getElementById('chips').innerHTML=p.t.map(x=>'<span>'+x+'</span>').join('');
+  document.getElementById('contador').textContent=
+    String(i+1).padStart(2,'0')+" / "+String(PROYECTOS.length).padStart(2,'0');
+}
+
+function ajustar(){
+  const e=Math.min(innerWidth/1080, innerHeight/1920);
+  lienzo.style.transform="scale("+e+")";
+  lienzo.style.left=((innerWidth-1080*e)/2)+"px";
+  lienzo.style.top=((innerHeight-1920*e)/2)+"px";
+}
+addEventListener('resize',ajustar); ajustar();
+
+function arrancar(){
+  const barra=document.getElementById('barra');
+  barra.style.transition="width "+TOTAL+"ms linear";
+  requestAnimationFrame(()=>{ barra.style.width="100%"; });
+  mostrar(0);
+  PROYECTOS.forEach((_,i)=>{ if(i>0) setTimeout(()=>mostrar(i), SEG*i); });
+  setTimeout(()=>{ document.getElementById('cierre').classList.add('on'); }, SEG*PROYECTOS.length);
+}
+
+// espera a que el primer video tenga datos para que no arranque en negro
+if(videos[0].readyState>=2){ arrancar(); }
+else { videos[0].addEventListener('loadeddata', arrancar, {once:true}); setTimeout(arrancar, 4000); }
+</script>
+</body>
+</html>

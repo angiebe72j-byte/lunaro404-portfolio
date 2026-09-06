@@ -17,6 +17,103 @@ const uploadsDir = path.join(DATA_DIR, 'uploads');
 
 app.use(cors());
 app.use(express.json());
+// ---------------------------------------------------------------
+// Registro de visitas propio (sin servicios externos)
+// Guarda una linea por visita en visitas.jsonl dentro de DATA_DIR.
+// No guarda IP ni nada que identifique a la persona: solo fecha,
+// que pagina vio, de donde vino y si entro desde celular.
+// ---------------------------------------------------------------
+const VISITAS_FILE = path.join(DATA_DIR, 'visitas.jsonl');
+const ES_BOT = /bot|crawler|spider|crawling|slurp|bingpreview|facebookexternalhit|headless/i;
+
+function registrar(datos) {
+    fs.appendFile(VISITAS_FILE, JSON.stringify(datos) + '\n', () => {});
+}
+
+app.use((req, res, next) => {
+    try {
+        if (req.method === 'GET') {
+            const ruta = req.path || '/';
+            const esPagina = ruta === '/' || /\.html?$/i.test(ruta);
+            const ua = req.headers['user-agent'] || '';
+            if (esPagina && !ES_BOT.test(ua) && ruta !== '/visitas.html') {
+                registrar({
+                    t: Date.now(),
+                    tipo: 'visita',
+                    ruta: ruta.slice(0, 120),
+                    origen: (req.headers.referer || 'directo').slice(0, 200),
+                    movil: /Mobi|Android|iPhone|iPad/i.test(ua)
+                });
+            }
+        }
+    } catch (e) { /* nunca romper el sitio por la analitica */ }
+    next();
+});
+
+// Eventos desde el navegador (por ejemplo, clic en un boton de WhatsApp)
+app.post('/api/evento', (req, res) => {
+    try {
+        const ua = req.headers['user-agent'] || '';
+        if (!ES_BOT.test(ua)) {
+            registrar({
+                t: Date.now(),
+                tipo: String(req.body && req.body.tipo || 'evento').slice(0, 40),
+                ruta: String(req.body && req.body.ruta || '').slice(0, 120),
+                detalle: String(req.body && req.body.detalle || '').slice(0, 80),
+                movil: /Mobi|Android|iPhone|iPad/i.test(ua)
+            });
+        }
+    } catch (e) {}
+    res.json({ ok: true });
+});
+
+// Datos ya resumidos para el panel
+app.get('/api/visitas', (req, res) => {
+    fs.readFile(VISITAS_FILE, 'utf8', (err, txt) => {
+        if (err) return res.json({ total: 0, hoy: 0, whatsapp: 0, dias: [], origenes: [], paginas: [], movil: 0 });
+
+        const filas = txt.trim().split('\n').slice(-20000).map(l => {
+            try { return JSON.parse(l); } catch (e) { return null; }
+        }).filter(Boolean);
+
+        const visitas = filas.filter(f => f.tipo === 'visita');
+        const clics = filas.filter(f => f.tipo === 'whatsapp');
+
+        const dia = ms => new Date(ms).toISOString().slice(0, 10);
+        const hoy = dia(Date.now());
+
+        const cuenta = (arr, fn) => {
+            const m = {};
+            arr.forEach(x => { const k = fn(x); if (k) m[k] = (m[k] || 0) + 1; });
+            return Object.entries(m).sort((a, b) => b[1] - a[1]);
+        };
+
+        const limpiarOrigen = o => {
+            if (!o || o === 'directo') return 'Directo';
+            try {
+                const h = new URL(o).hostname.replace(/^www\./, '');
+                if (h.includes('lunaro404')) return 'Interno';
+                if (h.includes('facebook') || h.includes('fb')) return 'Facebook';
+                if (h.includes('instagram')) return 'Instagram';
+                if (h.includes('google')) return 'Google';
+                if (h.includes('tiktok')) return 'TikTok';
+                if (h.includes('whatsapp')) return 'WhatsApp';
+                return h;
+            } catch (e) { return 'Directo'; }
+        };
+
+        res.json({
+            total: visitas.length,
+            hoy: visitas.filter(v => dia(v.t) === hoy).length,
+            whatsapp: clics.length,
+            movil: visitas.filter(v => v.movil).length,
+            dias: cuenta(visitas, v => dia(v.t)).sort((a, b) => a[0] < b[0] ? -1 : 1).slice(-30),
+            origenes: cuenta(visitas, v => limpiarOrigen(v.origen)).slice(0, 10),
+            paginas: cuenta(visitas, v => v.ruta === '/' ? '/ (inicio)' : v.ruta).slice(0, 10)
+        });
+    });
+});
+
 // Serve static files from the root directory (html, css, js)
 app.use(express.static(__dirname));
 

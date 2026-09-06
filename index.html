@@ -321,5 +321,21 @@
     </footer>
 
     <script src="script.js"></script>
+<script>
+// Avisa al servidor cuando alguien toca un boton de WhatsApp
+document.addEventListener('click', function (e) {
+  var a = e.target.closest && e.target.closest('a[href*="wa.me"]');
+  if (!a) return;
+  try {
+    var d = JSON.stringify({ tipo: 'whatsapp', ruta: location.pathname, detalle: (a.innerText || '').trim().slice(0, 60) });
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon('/api/evento', new Blob([d], { type: 'application/json' }));
+    } else {
+      fetch('/api/evento', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: d, keepalive: true });
+    }
+  } catch (err) {}
+}, true);
+</script>
+
 </body>
 </html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Visitas · Lunaro404</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --fondo:#080b12; --panel:#111722; --linea:#1e2634;
+    --texto:#e9eef7; --suave:#8a97ab; --celeste:#4cc9ff; --verde:#31d67f;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:var(--fondo); color:var(--texto); min-height:100vh;
+    font-family:Inter,'Segoe UI',system-ui,Arial,sans-serif;
+    padding:28px 20px 60px;
+  }
+  .caja{max-width:920px;margin:0 auto}
+
+  header{margin-bottom:28px}
+  .marca{font-size:30px;font-weight:900;letter-spacing:-1px}
+  .marca span{color:var(--celeste)}
+  header p{color:var(--suave);font-size:14.5px;margin-top:6px}
+
+  .tarjetas{
+    display:grid;gap:14px;margin-bottom:28px;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  }
+  .t{
+    background:var(--panel);border:1px solid var(--linea);
+    border-radius:14px;padding:20px;
+  }
+  .t .n{font-size:40px;font-weight:900;letter-spacing:-1.5px;line-height:1}
+  .t .e{font-size:12.5px;color:var(--suave);margin-top:8px;text-transform:uppercase;letter-spacing:.9px;font-weight:700}
+  .t.destacada .n{color:var(--verde)}
+  .t.hoy .n{color:var(--celeste)}
+
+  section{
+    background:var(--panel);border:1px solid var(--linea);
+    border-radius:14px;padding:22px;margin-bottom:18px;
+  }
+  h2{font-size:16px;font-weight:800;margin-bottom:18px}
+
+  .barras{display:flex;align-items:flex-end;gap:5px;height:150px}
+  .barra{flex:1;background:var(--celeste);border-radius:4px 4px 0 0;min-height:3px;position:relative;opacity:.85}
+  .barra:hover{opacity:1}
+  .barra span{
+    position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+    font-size:11px;color:var(--suave);padding-bottom:4px;white-space:nowrap;
+  }
+  .fechas{display:flex;gap:5px;margin-top:8px}
+  .fechas div{flex:1;text-align:center;font-size:10px;color:var(--suave);overflow:hidden}
+
+  table{width:100%;border-collapse:collapse;font-size:14.5px}
+  td{padding:11px 0;border-bottom:1px solid var(--linea)}
+  tr:last-child td{border-bottom:none}
+  td:last-child{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+  .vacio{color:var(--suave);font-size:14px;text-align:center;padding:20px 0}
+
+  .pie{color:var(--suave);font-size:13px;line-height:1.6;margin-top:24px}
+  .pie b{color:var(--texto)}
+  button{
+    background:var(--celeste);color:#04283a;border:0;border-radius:10px;
+    padding:11px 20px;font:800 14px Inter,sans-serif;cursor:pointer;margin-top:6px;
+  }
+</style>
+</head>
+<body>
+<div class="caja">
+  <header>
+    <div class="marca">Lunaro<span>404</span></div>
+    <p>Panel de visitas de lunaro404.com · se actualiza solo cada minuto</p>
+  </header>
+
+  <div class="tarjetas">
+    <div class="t hoy"><div class="n" id="hoy">—</div><div class="e">Visitas hoy</div></div>
+    <div class="t"><div class="n" id="total">—</div><div class="e">Visitas totales</div></div>
+    <div class="t destacada"><div class="n" id="wa">—</div><div class="e">Clics a WhatsApp</div></div>
+    <div class="t"><div class="n" id="movil">—</div><div class="e">Desde celular</div></div>
+  </div>
+
+  <section>
+    <h2>Visitas por día</h2>
+    <div class="barras" id="barras"></div>
+    <div class="fechas" id="fechas"></div>
+  </section>
+
+  <section>
+    <h2>De dónde vienen</h2>
+    <table id="origenes"></table>
+  </section>
+
+  <section>
+    <h2>Páginas más vistas</h2>
+    <table id="paginas"></table>
+  </section>
+
+  <div class="pie">
+    <b>Qué mide:</b> cada vez que alguien abre una página de tu sitio y cada clic en un botón de WhatsApp.<br>
+    <b>Qué no mide:</b> nombres ni teléfonos — eso no lo da ninguna herramienta. Los sabes cuando te escriben.<br>
+    <b>Ojo:</b> los datos se guardan en el servidor y se reinician con cada despliegue nuevo.
+    <br><button onclick="cargar()">Actualizar ahora</button>
+  </div>
+</div>
+
+<script>
+function tabla(id, filas, vacio){
+  var t = document.getElementById(id);
+  if(!filas || !filas.length){ t.innerHTML = '<tr><td class="vacio">'+vacio+'</td></tr>'; return; }
+  t.innerHTML = filas.map(function(f){
+    return '<tr><td>'+f[0]+'</td><td>'+f[1]+'</td></tr>';
+  }).join('');
+}
+
+function cargar(){
+  fetch('/api/visitas').then(function(r){ return r.json(); }).then(function(d){
+    document.getElementById('hoy').textContent = d.hoy;
+    document.getElementById('total').textContent = d.total;
+    document.getElementById('wa').textContent = d.whatsapp;
+    document.getElementById('movil').textContent =
+      d.total ? Math.round(d.movil / d.total * 100) + '%' : '—';
+
+    var max = Math.max(1, ...d.dias.map(function(x){ return x[1]; }));
+    document.getElementById('barras').innerHTML = d.dias.length
+      ? d.dias.map(function(x){
+          return '<div class="barra" style="height:'+Math.max(3, x[1]/max*100)+'%" title="'+x[0]+': '+x[1]+'"><span>'+x[1]+'</span></div>';
+        }).join('')
+      : '<div class="vacio" style="margin:auto">Aún no hay visitas registradas</div>';
+    document.getElementById('fechas').innerHTML = d.dias.map(function(x){
+      return '<div>'+x[0].slice(8)+'</div>';
+    }).join('');
+
+    tabla('origenes', d.origenes, 'Aún sin datos');
+    tabla('paginas', d.paginas, 'Aún sin datos');
+  });
+}
+cargar();
+setInterval(cargar, 60000);
+</script>
+</body>
+</html>

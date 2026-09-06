@@ -23,8 +23,19 @@ app.use(express.json());
 // No guarda IP ni nada que identifique a la persona: solo fecha,
 // que pagina vio, de donde vino y si entro desde celular.
 // ---------------------------------------------------------------
+const crypto = require('crypto');
 const VISITAS_FILE = path.join(DATA_DIR, 'visitas.jsonl');
 const ES_BOT = /bot|crawler|spider|crawling|slurp|bingpreview|facebookexternalhit|headless/i;
+
+// Huella anonima: identifica al mismo visitante durante el dia sin guardar su
+// IP. Se mezcla IP + navegador + fecha y se corta el hash; no hay forma de
+// volver atras ni de seguir a nadie de un dia para otro.
+function huella(req) {
+    const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+    const ua = req.headers['user-agent'] || '';
+    const dia = new Date().toISOString().slice(0, 10);
+    return crypto.createHash('sha256').update(ip + '|' + ua + '|' + dia).digest('hex').slice(0, 16);
+}
 
 function registrar(datos) {
     fs.appendFile(VISITAS_FILE, JSON.stringify(datos) + '\n', () => {});
@@ -40,6 +51,7 @@ app.use((req, res, next) => {
                 registrar({
                     t: Date.now(),
                     tipo: 'visita',
+                    v: huella(req),
                     ruta: ruta.slice(0, 120),
                     origen: (req.headers.referer || 'directo').slice(0, 200),
                     movil: /Mobi|Android|iPhone|iPad/i.test(ua)
@@ -58,6 +70,7 @@ app.post('/api/evento', (req, res) => {
             registrar({
                 t: Date.now(),
                 tipo: String(req.body && req.body.tipo || 'evento').slice(0, 40),
+                v: huella(req),
                 ruta: String(req.body && req.body.ruta || '').slice(0, 120),
                 detalle: String(req.body && req.body.detalle || '').slice(0, 80),
                 movil: /Mobi|Android|iPhone|iPad/i.test(ua)
@@ -70,7 +83,7 @@ app.post('/api/evento', (req, res) => {
 // Datos ya resumidos para el panel
 app.get('/api/visitas', (req, res) => {
     fs.readFile(VISITAS_FILE, 'utf8', (err, txt) => {
-        if (err) return res.json({ total: 0, hoy: 0, whatsapp: 0, dias: [], origenes: [], paginas: [], movil: 0 });
+        if (err) return res.json({ personas: 0, hoy: 0, vistas: 0, whatsapp: 0, clicsTotales: 0, dias: [], origenes: [], paginas: [], movil: 0 });
 
         const filas = txt.trim().split('\n').slice(-20000).map(l => {
             try { return JSON.parse(l); } catch (e) { return null; }
@@ -102,12 +115,29 @@ app.get('/api/visitas', (req, res) => {
             } catch (e) { return 'Directo'; }
         };
 
+        // Personas distintas: una misma huella cuenta una sola vez por dia,
+        // asi recargar la pagina 10 veces no infla el numero.
+        const personasPorDia = {};
+        visitas.forEach(v => {
+            const d = dia(v.t);
+            (personasPorDia[d] = personasPorDia[d] || new Set()).add(v.v || ('x' + v.t));
+        });
+        const diasPersonas = Object.entries(personasPorDia)
+            .map(([d, set]) => [d, set.size])
+            .sort((a, b) => a[0] < b[0] ? -1 : 1)
+            .slice(-30);
+
+        const huellasUnicas = new Set(visitas.map(v => v.v).filter(Boolean));
+        const movilesUnicos = new Set(visitas.filter(v => v.movil).map(v => v.v).filter(Boolean));
+
         res.json({
-            total: visitas.length,
-            hoy: visitas.filter(v => dia(v.t) === hoy).length,
-            whatsapp: clics.length,
-            movil: visitas.filter(v => v.movil).length,
-            dias: cuenta(visitas, v => dia(v.t)).sort((a, b) => a[0] < b[0] ? -1 : 1).slice(-30),
+            personas: huellasUnicas.size || visitas.length,
+            hoy: (personasPorDia[hoy] ? personasPorDia[hoy].size : 0),
+            vistas: visitas.length,
+            whatsapp: new Set(clics.map(c => c.v).filter(Boolean)).size || clics.length,
+            clicsTotales: clics.length,
+            movil: movilesUnicos.size,
+            dias: diasPersonas,
             origenes: cuenta(visitas, v => limpiarOrigen(v.origen)).slice(0, 10),
             paginas: cuenta(visitas, v => v.ruta === '/' ? '/ (inicio)' : v.ruta).slice(0, 10)
         });

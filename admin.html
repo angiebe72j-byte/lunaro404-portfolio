@@ -404,8 +404,15 @@
                             </span>
                         </label>
                         <input type="file" id="mediaFile" accept="video/mp4,video/webm">
-                        <small id="fileHelperText" style="display: block; margin-top: 6px; color: rgba(255,255,255,0.4); font-size: 12px;">Sube una grabación corta mostrando el sitio (.mp4 o .webm) · máximo 100 MB</small>
+                        <small id="fileHelperText" style="display: block; margin-top: 6px; color: rgba(255,255,255,0.4); font-size: 12px;">Sube una grabación corta mostrando el sitio (.mp4 o .webm). Si pesa mucho, se comprime solo antes de subir.</small>
+                    
+                    <div id="barraCompresion" hidden style="margin-top:14px">
+                        <div style="height:8px;background:#1e2634;border-radius:99px;overflow:hidden">
+                            <div id="rellenoCompresion" style="height:100%;width:0;background:linear-gradient(90deg,#4cc9ff,#31d67f);border-radius:99px;transition:width .25s ease"></div>
+                        </div>
+                        <div id="textoCompresion" style="margin-top:8px;font-size:12.5px;color:#8a97ab">Preparando…</div>
                     </div>
+</div>
 
                     <button type="submit" class="submit-btn" id="submitBtn">Guardar Proyecto</button>
                     <button type="button" class="cancel-btn" id="cancelEditBtn">Cancelar Edición</button>

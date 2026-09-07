@@ -1,3 +1,63 @@
+
+// ---------------------------------------------------------------
+// Comprime el video en el propio navegador antes de subirlo.
+// Reproduce el archivo en un canvas reducido y lo vuelve a grabar con
+// MediaRecorder. Asi un video de 118 MB llega a Cloudinary pesando 3 o 4 MB,
+// sin que haya que preparar nada a mano y sin herramientas externas.
+// ---------------------------------------------------------------
+function comprimirVideo(archivo, alAvanzar) {
+    return new Promise((resolve, reject) => {
+        if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) {
+            return reject(new Error('Tu navegador no puede comprimir videos. Usa Chrome.'));
+        }
+
+        const video = document.createElement('video');
+        video.muted = true;
+        video.playsInline = true;
+        video.src = URL.createObjectURL(archivo);
+
+        video.onerror = () => reject(new Error('No se pudo leer el video.'));
+
+        video.onloadedmetadata = () => {
+            const ANCHO_MAX = 1280;
+            const escala = Math.min(1, ANCHO_MAX / video.videoWidth);
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(video.videoWidth * escala / 2) * 2;
+            canvas.height = Math.round(video.videoHeight * escala / 2) * 2;
+            const ctx = canvas.getContext('2d');
+
+            const stream = canvas.captureStream(30);
+            const tipos = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+            const tipo = tipos.find(t => MediaRecorder.isTypeSupported(t));
+            if (!tipo) return reject(new Error('Tu navegador no soporta la grabación.'));
+
+            const rec = new MediaRecorder(stream, { mimeType: tipo, videoBitsPerSecond: 1400000 });
+            const trozos = [];
+            rec.ondataavailable = e => { if (e.data.size) trozos.push(e.data); };
+            rec.onerror = () => reject(new Error('Falló la compresión.'));
+            rec.onstop = () => {
+                URL.revokeObjectURL(video.src);
+                const blob = new Blob(trozos, { type: 'video/webm' });
+                const nombre = archivo.name.replace(/\.[^.]+$/, '') + '-web.webm';
+                resolve(new File([blob], nombre, { type: 'video/webm' }));
+            };
+
+            let corriendo = true;
+            function dibujar() {
+                if (!corriendo) return;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                if (video.duration) alAvanzar(Math.min(99, video.currentTime / video.duration * 100));
+                requestAnimationFrame(dibujar);
+            }
+
+            video.onended = () => { corriendo = false; alAvanzar(100); setTimeout(() => rec.stop(), 250); };
+
+            rec.start(1000);
+            video.play().then(dibujar).catch(reject);
+        };
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const addProjectForm = document.getElementById('addProjectForm');
     const projectsTableBody = document.getElementById('projectsTableBody');
@@ -253,22 +313,33 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('keepExistingFile', 'true');
         }
 
-        // Cloudinary no acepta videos de mas de 100 MB. Avisar antes de
-        // intentar la subida, en vez de dejar que falle sin explicacion.
-        const LIMITE = 95 * 1024 * 1024;
-        const archivo = document.getElementById('mediaFile').files[0];
-        if (archivo && archivo.size > LIMITE) {
-            const mb = (archivo.size / 1048576).toFixed(0);
-            alert(
-                'El video pesa ' + mb + ' MB y el limite para subir es 100 MB.\n\n' +
-                'Comprimelo antes de subirlo. Con CapCut o HandBrake, exportando a ' +
-                '1280 de ancho y sin audio, suele quedar en menos de 10 MB y se ve igual.\n\n' +
-                'No te preocupes por la calidad: la web ya entrega los videos comprimidos ' +
-                'automaticamente.'
-            );
-            submitBtn.textContent = editingId ? 'Actualizar Proyecto' : 'Guardar Proyecto';
-            submitBtn.disabled = false;
-            return;
+        // Los videos pesados se comprimen aqui mismo, en el navegador, antes de
+        // enviarlos. Cloudinary rechaza todo lo que pase de 100 MB, y ademas un
+        // archivo liviano se sube mucho mas rapido.
+        const UMBRAL = 12 * 1024 * 1024;
+        const original = mediaFileInput.files[0];
+        if (original && original.size > UMBRAL) {
+            const barra = document.getElementById('barraCompresion');
+            const relleno = document.getElementById('rellenoCompresion');
+            const textoBarra = document.getElementById('textoCompresion');
+            barra.hidden = false;
+            const mbAntes = (original.size / 1048576).toFixed(0);
+            try {
+                const comprimido = await comprimirVideo(original, pct => {
+                    relleno.style.width = pct + '%';
+                    textoBarra.textContent = 'Comprimiendo video… ' + Math.round(pct) + '%';
+                });
+                const mbDespues = (comprimido.size / 1048576).toFixed(1);
+                textoBarra.textContent = 'Listo: de ' + mbAntes + ' MB a ' + mbDespues + ' MB · subiendo…';
+                formData.set('mediaFile', comprimido);
+            } catch (e) {
+                barra.hidden = true;
+                alert('No se pudo comprimir el video.\n\n' + e.message +
+                      '\n\nSube uno mas liviano o comprimelo con CapCut.');
+                submitBtn.textContent = editingId ? 'Actualizar Proyecto' : 'Guardar Proyecto';
+                submitBtn.disabled = false;
+                return;
+            }
         }
 
         try {
@@ -302,6 +373,8 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Error guardando proyecto:", error);
             alert('Error de conexión con el servidor.');
         } finally {
+            const b = document.getElementById('barraCompresion');
+            if (b) b.hidden = true;
             submitBtn.textContent = editingId ? 'Actualizar Proyecto' : 'Guardar Proyecto';
             submitBtn.disabled = false;
         }

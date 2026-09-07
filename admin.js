@@ -12,7 +12,8 @@ function comprimirVideo(archivo, alAvanzar) {
         }
 
         const video = document.createElement('video');
-        video.muted = true;
+        video.muted = true;      // no suena mientras comprime
+        video.volume = 0;
         video.playsInline = true;
         video.src = URL.createObjectURL(archivo);
 
@@ -26,12 +27,31 @@ function comprimirVideo(archivo, alAvanzar) {
             canvas.height = Math.round(video.videoHeight * escala / 2) * 2;
             const ctx = canvas.getContext('2d');
 
+            // Imagen desde el canvas reducido, sonido desde el video original.
+            // Se juntan en un solo stream para que el archivo salga con audio.
             const stream = canvas.captureStream(30);
-            const tipos = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+            let pistasAudio = [];
+            try {
+                const delVideo = video.captureStream ? video.captureStream()
+                               : (video.mozCaptureStream ? video.mozCaptureStream() : null);
+                if (delVideo) pistasAudio = delVideo.getAudioTracks();
+            } catch (e) { /* si no se puede, sigue sin audio */ }
+
+            const mezcla = new MediaStream([
+                ...stream.getVideoTracks(),
+                ...pistasAudio
+            ]);
+
+            const conAudio = pistasAudio.length > 0;
+            const tipos = conAudio
+                ? ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']
+                : ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
             const tipo = tipos.find(t => MediaRecorder.isTypeSupported(t));
             if (!tipo) return reject(new Error('Tu navegador no soporta la grabación.'));
 
-            const rec = new MediaRecorder(stream, { mimeType: tipo, videoBitsPerSecond: 1400000 });
+            const opciones = { mimeType: tipo, videoBitsPerSecond: 1400000 };
+            if (conAudio) opciones.audioBitsPerSecond = 96000;
+            const rec = new MediaRecorder(mezcla, opciones);
             const trozos = [];
             rec.ondataavailable = e => { if (e.data.size) trozos.push(e.data); };
             rec.onerror = () => reject(new Error('Falló la compresión.'));

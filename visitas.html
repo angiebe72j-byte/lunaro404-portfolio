@@ -66,8 +66,15 @@
   .pie b{color:var(--texto)}
   button{
     background:var(--celeste);color:#04283a;border:0;border-radius:10px;
-    padding:11px 20px;font:800 14px Inter,sans-serif;cursor:pointer;margin-top:6px;
+    padding:11px 20px;font:800 14px Inter,sans-serif;cursor:pointer;margin-top:8px;margin-right:8px;
   }
+  button.gris{background:#243044;color:#cfd8e6}
+  button.rojo{background:#3a1c22;color:#ff8b93}
+  .aviso{
+    background:#12313f;border:1px solid #1d4b5e;color:#bfe6f5;
+    border-radius:12px;padding:14px 16px;margin-bottom:20px;font-size:14px;line-height:1.55;
+  }
+  .aviso b{color:#fff}
 </style>
 </head>
 <body>
@@ -76,6 +83,8 @@
     <div class="marca">Lunaro<span>404</span></div>
     <p>Panel de visitas de lunaro404.com · se actualiza solo cada minuto</p>
   </header>
+
+  <div class="aviso" id="aviso" hidden></div>
 
   <div class="tarjetas">
     <div class="t hoy"><div class="n" id="hoy">—</div><div class="e">Personas hoy</div></div>
@@ -105,7 +114,10 @@
     <b>Cómo lo hace:</b> con una huella anónima que mezcla tu conexión, tu navegador y la fecha. No se guarda tu IP y la huella cambia cada día.<br>
     <b>Qué no mide:</b> nombres ni teléfonos — eso no lo da ninguna herramienta. Los sabes cuando te escriben.<br>
     <b>Ojo:</b> los datos se guardan en el servidor y se reinician con cada despliegue nuevo.
-    <br><button onclick="cargar()">Actualizar ahora</button>
+    <br>
+    <button onclick="cargar()">Actualizar ahora</button>
+    <button class="gris" id="btnExcluir" onclick="excluirme()">No contar mis visitas</button>
+    <button class="rojo" onclick="reiniciar()">Empezar de cero</button>
   </div>
 </div>
 
@@ -142,6 +154,45 @@ function cargar(){
     tabla('paginas', d.paginas, 'Aún sin datos');
   });
 }
+function tieneCookie(){ return /lunaro_admin=1/.test(document.cookie); }
+
+function pintarAviso(){
+  var a = document.getElementById('aviso');
+  var b = document.getElementById('btnExcluir');
+  if (tieneCookie()){
+    a.hidden = false;
+    a.innerHTML = '<b>Tus visitas ya no se cuentan</b> desde este dispositivo y navegador. ' +
+                  'Si entras desde el celular, abre este panel ahí también y toca el mismo botón.';
+    b.textContent = 'Volver a contar mis visitas';
+  } else {
+    a.hidden = false;
+    a.innerHTML = '<b>Tus propias visitas se están contando.</b> ' +
+                  'Toca <b>“No contar mis visitas”</b> abajo para que tus entradas y las pruebas no ensucien los números.';
+    b.textContent = 'No contar mis visitas';
+  }
+}
+
+function excluirme(){
+  if (tieneCookie()){
+    document.cookie = 'lunaro_admin=0; path=/; max-age=0';
+  } else {
+    document.cookie = 'lunaro_admin=1; path=/; max-age=31536000';
+  }
+  pintarAviso();
+}
+
+function reiniciar(){
+  if (!tieneCookie()){
+    alert('Primero toca “No contar mis visitas” — así el panel sabe que eres tú.');
+    return;
+  }
+  if (!confirm('¿Borrar todos los datos y empezar de cero?\n\nEsto elimina las visitas de prueba. No se puede deshacer.')) return;
+  fetch('/api/reiniciar', { method: 'POST' })
+    .then(function(r){ return r.json(); })
+    .then(function(){ cargar(); });
+}
+
+pintarAviso();
 cargar();
 setInterval(cargar, 60000);
 </script>

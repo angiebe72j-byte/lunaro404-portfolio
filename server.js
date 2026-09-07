@@ -47,7 +47,8 @@ app.use((req, res, next) => {
             const ruta = req.path || '/';
             const esPagina = ruta === '/' || /\.html?$/i.test(ruta);
             const ua = req.headers['user-agent'] || '';
-            if (esPagina && !ES_BOT.test(ua) && ruta !== '/visitas.html') {
+            const esDueno = /lunaro_admin=1/.test(req.headers.cookie || '');
+            if (esPagina && !ES_BOT.test(ua) && ruta !== '/visitas.html' && !esDueno) {
                 registrar({
                     t: Date.now(),
                     tipo: 'visita',
@@ -66,7 +67,7 @@ app.use((req, res, next) => {
 app.post('/api/evento', (req, res) => {
     try {
         const ua = req.headers['user-agent'] || '';
-        if (!ES_BOT.test(ua)) {
+        if (!ES_BOT.test(ua) && !/lunaro_admin=1/.test(req.headers.cookie || '')) {
             registrar({
                 t: Date.now(),
                 tipo: String(req.body && req.body.tipo || 'evento').slice(0, 40),
@@ -78,6 +79,14 @@ app.post('/api/evento', (req, res) => {
         }
     } catch (e) {}
     res.json({ ok: true });
+});
+
+// Empezar de cero (solo desde el panel, que marca la cookie de dueno)
+app.post('/api/reiniciar', (req, res) => {
+    if (!/lunaro_admin=1/.test(req.headers.cookie || '')) {
+        return res.status(403).json({ ok: false, error: 'Solo desde el panel' });
+    }
+    fs.writeFile(VISITAS_FILE, '', () => res.json({ ok: true }));
 });
 
 // Datos ya resumidos para el panel

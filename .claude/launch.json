@@ -2,9 +2,9 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "shazam-clone",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["start"],
+      "name": "lunaro",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["server.js"],
       "port": 3000
     }
   ]

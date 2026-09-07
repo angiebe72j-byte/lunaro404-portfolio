@@ -253,6 +253,24 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('keepExistingFile', 'true');
         }
 
+        // Cloudinary no acepta videos de mas de 100 MB. Avisar antes de
+        // intentar la subida, en vez de dejar que falle sin explicacion.
+        const LIMITE = 95 * 1024 * 1024;
+        const archivo = document.getElementById('mediaFile').files[0];
+        if (archivo && archivo.size > LIMITE) {
+            const mb = (archivo.size / 1048576).toFixed(0);
+            alert(
+                'El video pesa ' + mb + ' MB y el limite para subir es 100 MB.\n\n' +
+                'Comprimelo antes de subirlo. Con CapCut o HandBrake, exportando a ' +
+                '1280 de ancho y sin audio, suele quedar en menos de 10 MB y se ve igual.\n\n' +
+                'No te preocupes por la calidad: la web ya entrega los videos comprimidos ' +
+                'automaticamente.'
+            );
+            submitBtn.textContent = editingId ? 'Actualizar Proyecto' : 'Guardar Proyecto';
+            submitBtn.disabled = false;
+            return;
+        }
+
         try {
             let url = '/api/faces';
             let method = 'POST';
@@ -271,7 +289,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetForm();
                 loadProjects();
             } else {
-                alert('Error al guardar el proyecto');
+                let detalle = '';
+                try { const j = await response.json(); detalle = j.error || j.message || ''; } catch (e) {}
+                alert(
+                    'No se pudo guardar el proyecto.\n\n' +
+                    (detalle ? 'Motivo: ' + detalle + '\n\n' : '') +
+                    'Lo mas comun es que el video pese demasiado. Si supera los 100 MB, ' +
+                    'comprimelo y vuelve a intentar.'
+                );
             }
         } catch (error) {
             console.error("Error guardando proyecto:", error);

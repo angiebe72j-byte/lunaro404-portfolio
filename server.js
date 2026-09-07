@@ -423,6 +423,17 @@ app.get('/salud', (req, res) => {
     res.json({ ok: true, hora: new Date().toISOString() });
 });
 
+// Manejador de errores: sin esto, cuando Cloudinary rechaza una subida el
+// fallo se pierde y el panel solo muestra "Error al guardar" sin explicar
+// nada. Aqui se registra el motivo real y se devuelve al navegador.
+app.use((err, req, res, next) => {
+    const detalle = (err && (err.message || (err.error && err.error.message))) || String(err);
+    const codigo = (err && (err.http_code || (err.error && err.error.http_code))) || null;
+    console.error('ERROR EN SUBIDA >>', JSON.stringify({ mensaje: detalle, codigo: codigo, nombre: err && err.name }));
+    if (res.headersSent) return next(err);
+    res.status(500).json({ error: detalle, codigo: codigo });
+});
+
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });

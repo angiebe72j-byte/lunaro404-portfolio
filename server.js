@@ -285,6 +285,7 @@ app.put('/api/faces/reorder', (req, res) => {
 
         fs.writeFile(DATA_FILE, JSON.stringify(reordered, null, 4), (err) => {
             if (err) return res.status(500).json({ error: 'Failed to save data' });
+            subirRespaldo();
             res.json(reordered);
         });
     });
@@ -348,6 +349,7 @@ app.put('/api/faces/:id', upload.single('mediaFile'), (req, res) => {
 
         fs.writeFile(DATA_FILE, JSON.stringify(faces, null, 4), (err) => {
             if (err) return res.status(500).json({ error: 'Failed to save data' });
+            subirRespaldo();
             res.json(updatedFace);
         });
     });
@@ -389,6 +391,7 @@ app.post('/api/faces', upload.single('mediaFile'), (req, res) => {
 
         fs.writeFile(DATA_FILE, JSON.stringify(faces, null, 4), (err) => {
             if (err) return res.status(500).json({ error: 'Failed to save data' });
+            subirRespaldo();
             res.status(201).json(newFace);
         });
     });
@@ -413,6 +416,7 @@ app.delete('/api/faces/:id', (req, res) => {
 
         fs.writeFile(DATA_FILE, JSON.stringify(faces, null, 4), (err) => {
             if (err) return res.status(500).json({ error: 'Failed to save data' });
+            subirRespaldo();
             res.json({ success: true });
         });
     });
@@ -434,8 +438,53 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: detalle, codigo: codigo });
 });
 
+
+// ---------------------------------------------------------------
+// Respaldo del listado de proyectos en Cloudinary
+//
+// El disco de Render es efimero: cada despliegue recrea el servidor desde el
+// repositorio y borra lo que se haya escrito mientras corria. Por eso los
+// proyectos agregados desde el panel desaparecian al publicar cualquier
+// cambio. Aqui se guarda una copia del listado en la misma cuenta de
+// Cloudinary donde ya viven los videos, y al arrancar se recupera.
+// ---------------------------------------------------------------
+const RESPALDO_ID = 'lunaro404/data-portafolio';
+
+async function subirRespaldo() {
+    if (!useCloudinary) return;
+    try {
+        await cloudinary.uploader.upload(DATA_FILE, {
+            resource_type: 'raw',
+            public_id: RESPALDO_ID,
+            overwrite: true,
+            invalidate: true
+        });
+        console.log('[respaldo] listado guardado en Cloudinary');
+    } catch (e) {
+        console.error('[respaldo] no se pudo guardar:', e && e.message);
+    }
+}
+
+async function recuperarRespaldo() {
+    if (!useCloudinary) return;
+    try {
+        const url = cloudinary.url(RESPALDO_ID, { resource_type: 'raw', secure: true }) + '?t=' + Date.now();
+        const r = await fetch(url);
+        if (!r.ok) { console.log('[respaldo] aun no hay copia guardada'); return; }
+        const texto = await r.text();
+        const datos = JSON.parse(texto);
+        if (Array.isArray(datos) && datos.length) {
+            fs.writeFileSync(DATA_FILE, JSON.stringify(datos, null, 4));
+            console.log('[respaldo] listado recuperado: ' + datos.length + ' proyectos');
+        }
+    } catch (e) {
+        console.error('[respaldo] no se pudo recuperar:', e && e.message);
+    }
+}
+
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
+    recuperarRespaldo();
 });
 
 // --- Auto-ping para que Render no apague la instancia ---

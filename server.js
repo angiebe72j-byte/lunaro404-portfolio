@@ -89,6 +89,18 @@ app.post('/api/reiniciar', (req, res) => {
     fs.writeFile(VISITAS_FILE, '', () => res.json({ ok: true }));
 });
 
+// Ultimos movimientos, para el aviso en vivo del panel
+app.get('/api/ultimos', (req, res) => {
+    const desde = Number(req.query.desde) || 0;
+    fs.readFile(VISITAS_FILE, 'utf8', (err, txt) => {
+        if (err) return res.json({ ahora: Date.now(), eventos: [] });
+        const eventos = txt.trim().split('\n').slice(-400).map(l => {
+            try { return JSON.parse(l); } catch (e) { return null; }
+        }).filter(f => f && f.t > desde).slice(-25);
+        res.json({ ahora: Date.now(), eventos });
+    });
+});
+
 // Datos ya resumidos para el panel
 app.get('/api/visitas', (req, res) => {
     fs.readFile(VISITAS_FILE, 'utf8', (err, txt) => {

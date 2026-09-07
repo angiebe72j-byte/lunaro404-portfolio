@@ -62,6 +62,34 @@
   td:last-child{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
   .vacio{color:var(--suave);font-size:14px;text-align:center;padding:20px 0}
 
+
+  .vivo{
+    background:var(--panel);border:1px solid var(--linea);
+    border-radius:14px;padding:22px;margin-bottom:18px;
+  }
+  .cabecera{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+  .cabecera h2{margin:0}
+  .punto{
+    display:inline-block;width:9px;height:9px;border-radius:50%;
+    background:var(--verde);margin-right:8px;animation:latir 1.8s ease-in-out infinite;
+  }
+  @keyframes latir{0%,100%{opacity:1;box-shadow:0 0 0 0 #31d67f66}50%{opacity:.55;box-shadow:0 0 0 7px #31d67f00}}
+  .feed{display:flex;flex-direction:column;gap:9px;max-height:280px;overflow-y:auto}
+  .ev{
+    display:flex;align-items:center;gap:12px;
+    background:#0d1420;border:1px solid var(--linea);
+    border-radius:11px;padding:12px 14px;font-size:14px;
+    animation:entra .4s ease;
+  }
+  @keyframes entra{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+  .ev.wa{border-color:#1f5c3d;background:#0d1f17}
+  .ev .ic{font-size:19px;flex:0 0 auto}
+  .ev .txt{flex:1;line-height:1.35}
+  .ev .txt b{color:var(--celeste)}
+  .ev.wa .txt b{color:var(--verde)}
+  .ev .hora{color:var(--suave);font-size:12px;white-space:nowrap}
+  .interruptor{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--suave);cursor:pointer}
+  .interruptor input{width:17px;height:17px;accent-color:var(--celeste);cursor:pointer}
   .pie{color:var(--suave);font-size:13px;line-height:1.6;margin-top:24px}
   .pie b{color:var(--texto)}
   button{
@@ -91,6 +119,19 @@
     <div class="t"><div class="n" id="total">—</div><div class="e">Personas en total</div><div class="sub" id="vistas"></div></div>
     <div class="t destacada"><div class="n" id="wa">—</div><div class="e">Quisieron escribirte</div><div class="sub" id="clics"></div></div>
     <div class="t"><div class="n" id="movil">—</div><div class="e">Desde celular</div></div>
+  </div>
+
+  <div class="vivo">
+    <div class="cabecera">
+      <h2><span class="punto"></span>En vivo</h2>
+      <label class="interruptor">
+        <input type="checkbox" id="avisos" onchange="pedirPermiso()">
+        Avisarme con notificación y sonido
+      </label>
+    </div>
+    <div class="feed" id="feed">
+      <div class="vacio">Esperando movimientos…</div>
+    </div>
   </div>
 
   <section>
@@ -195,6 +236,91 @@ function reiniciar(){
 pintarAviso();
 cargar();
 setInterval(cargar, 60000);
+
+// ---------------- avisos en vivo ----------------
+var ultimoT = Date.now();
+var primeraVez = true;
+
+function pedirPermiso(){
+  if (document.getElementById('avisos').checked && 'Notification' in window){
+    Notification.requestPermission();
+  }
+}
+
+function pitido(){
+  try{
+    var c = new (window.AudioContext || window.webkitAudioContext)();
+    var o = c.createOscillator(), g = c.createGain();
+    o.connect(g); g.connect(c.destination);
+    o.frequency.value = 880; o.type = 'sine';
+    g.gain.setValueAtTime(0.001, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.25, c.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.35);
+    o.start(); o.stop(c.currentTime + 0.36);
+  }catch(e){}
+}
+
+function deDonde(o){
+  if(!o || o === 'directo') return 'directo';
+  try{
+    var hst = new URL(o).hostname.replace(/^www\./,'');
+    if(hst.indexOf('lunaro404') > -1) return 'tu propia web';
+    if(hst.indexOf('facebook') > -1) return 'Facebook';
+    if(hst.indexOf('instagram') > -1) return 'Instagram';
+    if(hst.indexOf('google') > -1) return 'Google';
+    if(hst.indexOf('tiktok') > -1) return 'TikTok';
+    if(hst.indexOf('whatsapp') > -1) return 'WhatsApp';
+    return hst;
+  }catch(e){ return 'directo'; }
+}
+
+function pintarEvento(ev){
+  var feed = document.getElementById('feed');
+  var vacio = feed.querySelector('.vacio');
+  if (vacio) vacio.remove();
+
+  var esWA = ev.tipo === 'whatsapp';
+  var hora = new Date(ev.t).toLocaleTimeString('es-PE', {hour:'2-digit', minute:'2-digit'});
+  var texto = esWA
+    ? '<b>¡Alguien quiere escribirte!</b> Tocó un botón de WhatsApp'
+    : 'Nueva visita desde <b>' + deDonde(ev.origen) + '</b>' + (ev.movil ? ' · celular' : ' · computadora');
+
+  var d = document.createElement('div');
+  d.className = 'ev' + (esWA ? ' wa' : '');
+  d.innerHTML = '<div class="ic">' + (esWA ? '💬' : '👀') + '</div>' +
+                '<div class="txt">' + texto + '</div>' +
+                '<div class="hora">' + hora + '</div>';
+  feed.insertBefore(d, feed.firstChild);
+  while (feed.children.length > 25) feed.removeChild(feed.lastChild);
+
+  if (!primeraVez && document.getElementById('avisos').checked){
+    pitido();
+    if ('Notification' in window && Notification.permission === 'granted'){
+      new Notification(esWA ? '💬 ¡Quieren escribirte!' : '👀 Nueva visita', {
+        body: esWA ? 'Alguien tocó un botón de WhatsApp en tu web'
+                   : 'Alguien entró a lunaro404.com desde ' + deDonde(ev.origen),
+        tag: 'lunaro-' + ev.t
+      });
+    }
+  }
+}
+
+function mirarEnVivo(){
+  fetch('/api/ultimos?desde=' + ultimoT)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      (d.eventos || []).forEach(pintarEvento);
+      if (d.eventos && d.eventos.length){
+        ultimoT = d.eventos[d.eventos.length - 1].t;
+        cargar();
+      }
+      primeraVez = false;
+    })
+    .catch(function(){});
+}
+setInterval(mirarEnVivo, 5000);
+mirarEnVivo();
+
 </script>
 </body>
 </html>

@@ -7,6 +7,50 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <style>
+
+        /* --- Visitas --- */
+        .vis-grid{
+            display:grid;gap:14px;margin-bottom:24px;
+            grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+        }
+        .vis-t{
+            background:rgba(255,255,255,0.04);
+            border:1px solid rgba(255,255,255,0.08);
+            border-radius:16px;padding:18px;
+        }
+        .vis-t .n{font-size:34px;font-weight:900;letter-spacing:-1px;line-height:1}
+        .vis-t .e{font-size:11px;color:rgba(255,255,255,0.45);margin-top:7px;text-transform:uppercase;letter-spacing:.8px;font-weight:700}
+        .vis-t .s{font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px}
+        .vis-t.hoy .n{color:#4cc9ff}
+        .vis-t.wa .n{color:#31d67f}
+
+        .vis-barras{display:flex;align-items:flex-end;justify-content:flex-start;gap:5px;height:110px;margin-bottom:6px}
+        .vis-barra{flex:1 1 0;max-width:44px;background:#4cc9ff;border-radius:4px 4px 0 0;min-height:3px;opacity:.85}
+        .vis-fechas{display:flex;gap:5px;justify-content:flex-start}
+        .vis-fechas div{flex:1 1 0;max-width:44px;text-align:center;font-size:9.5px;color:rgba(255,255,255,0.3)}
+
+        .vis-cols{display:grid;gap:22px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));margin-top:24px}
+        .vis-cols h4{font-size:13px;font-weight:800;margin-bottom:12px;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:.7px}
+        .vis-tabla{width:100%;border-collapse:collapse;font-size:13.5px}
+        .vis-tabla td{padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.06)}
+        .vis-tabla td:last-child{text-align:right;font-weight:800}
+        .vis-nada{color:rgba(255,255,255,0.3);font-size:13px;padding:14px 0;text-align:center}
+
+        .vis-feed{display:flex;flex-direction:column;gap:8px;max-height:210px;overflow-y:auto;margin-top:8px}
+        .vis-ev{
+            display:flex;align-items:center;gap:11px;
+            background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+            border-radius:11px;padding:10px 13px;font-size:13.5px;
+        }
+        .vis-ev.wa{border-color:rgba(49,214,127,0.35);background:rgba(49,214,127,0.07)}
+        .vis-ev .t{flex:1;line-height:1.35}
+        .vis-ev .h{color:rgba(255,255,255,0.35);font-size:11.5px;white-space:nowrap}
+        .vis-punto{
+            display:inline-block;width:8px;height:8px;border-radius:50%;
+            background:#31d67f;margin-right:8px;animation:vislatir 1.8s ease-in-out infinite;
+        }
+        @keyframes vislatir{0%,100%{opacity:1}50%{opacity:.4}}
+
         /* Estilos específicos para el panel */
         body {
             --dynamic-bg: #050a12;
@@ -445,6 +489,47 @@
                 </div>
             </div>
 
+            <!-- Visitas -->
+            <div class="admin-card" style="margin-bottom:28px">
+                <div class="admin-card-header">
+                    <h2 class="admin-title"><span class="vis-punto"></span>Visitas a tu web</h2>
+                    <p class="admin-subtitle">Cuánta gente entra, de dónde viene y quiénes quieren escribirte</p>
+                </div>
+
+                <div class="vis-grid">
+                    <div class="vis-t hoy"><div class="n" id="vHoy">—</div><div class="e">Personas hoy</div></div>
+                    <div class="vis-t"><div class="n" id="vTotal">—</div><div class="e">Personas en total</div><div class="s" id="vVistas"></div></div>
+                    <div class="vis-t wa"><div class="n" id="vWa">—</div><div class="e">Quisieron escribirte</div><div class="s" id="vClics"></div></div>
+                    <div class="vis-t"><div class="n" id="vMovil">—</div><div class="e">Desde celular</div></div>
+                </div>
+
+                <h4 style="font-size:13px;font-weight:800;margin-bottom:12px;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:.7px">Personas por día</h4>
+                <div class="vis-barras" id="vBarras"></div>
+                <div class="vis-fechas" id="vFechas"></div>
+
+                <div class="vis-cols">
+                    <div>
+                        <h4>De dónde vienen</h4>
+                        <table class="vis-tabla" id="vOrigenes"></table>
+                    </div>
+                    <div>
+                        <h4>Páginas más vistas</h4>
+                        <table class="vis-tabla" id="vPaginas"></table>
+                    </div>
+                </div>
+
+                <div style="margin-top:26px">
+                    <h4 style="font-size:13px;font-weight:800;margin-bottom:4px;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:.7px">En vivo</h4>
+                    <div class="vis-feed" id="vFeed"><div class="vis-nada">Esperando movimientos…</div></div>
+                </div>
+
+                <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap">
+                    <button type="button" class="cancel-btn" style="display:inline-block;width:auto" onclick="visCargar()">Actualizar</button>
+                    <button type="button" class="cancel-btn" style="display:inline-block;width:auto" id="vBtnExcluir" onclick="visExcluirme()">No contar mis visitas</button>
+                    <a href="visitas.html" target="_blank" class="cancel-btn" style="display:inline-block;width:auto;text-decoration:none;text-align:center">Abrir panel completo</a>
+                </div>
+            </div>
+
             <!-- Lista -->
             <div class="admin-card">
                 <div class="admin-card-header">
@@ -486,5 +571,89 @@
     </div>
 
     <script src="admin.js"></script>
+
+<script>
+// ---------------- Visitas dentro del panel ----------------
+function visTabla(id, filas){
+  var t = document.getElementById(id);
+  if(!t) return;
+  if(!filas || !filas.length){ t.innerHTML = '<tr><td class="vis-nada">Aún sin datos</td></tr>'; return; }
+  t.innerHTML = filas.map(function(f){ return '<tr><td>'+f[0]+'</td><td>'+f[1]+'</td></tr>'; }).join('');
+}
+
+function visCargar(){
+  fetch('/api/visitas').then(function(r){ return r.json(); }).then(function(d){
+    document.getElementById('vHoy').textContent = d.hoy;
+    document.getElementById('vTotal').textContent = d.personas;
+    document.getElementById('vWa').textContent = d.whatsapp;
+    document.getElementById('vVistas').textContent = d.vistas + ' páginas vistas';
+    document.getElementById('vClics').textContent = d.clicsTotales + ' clics';
+    document.getElementById('vMovil').textContent = d.personas ? Math.round(d.movil/d.personas*100)+'%' : '—';
+
+    var max = Math.max(1, ...d.dias.map(function(x){ return x[1]; }));
+    document.getElementById('vBarras').innerHTML = d.dias.length
+      ? d.dias.map(function(x){ return '<div class="vis-barra" style="height:'+Math.max(3,x[1]/max*100)+'%" title="'+x[0]+': '+x[1]+'"></div>'; }).join('')
+      : '<div class="vis-nada" style="margin:auto">Aún no hay visitas</div>';
+    document.getElementById('vFechas').innerHTML = d.dias.map(function(x){ return '<div>'+x[0].slice(8)+'</div>'; }).join('');
+
+    visTabla('vOrigenes', d.origenes);
+    visTabla('vPaginas', d.paginas);
+  }).catch(function(){});
+}
+
+function visDeDonde(o){
+  if(!o || o === 'directo') return 'directo';
+  try{
+    var x = new URL(o).hostname.replace(/^www\./,'');
+    if(x.indexOf('lunaro404')>-1) return 'tu propia web';
+    if(x.indexOf('facebook')>-1) return 'Facebook';
+    if(x.indexOf('instagram')>-1) return 'Instagram';
+    if(x.indexOf('google')>-1) return 'Google';
+    if(x.indexOf('tiktok')>-1) return 'TikTok';
+    if(x.indexOf('whatsapp')>-1) return 'WhatsApp';
+    return x;
+  }catch(e){ return 'directo'; }
+}
+
+var visUltimo = Date.now();
+function visEnVivo(){
+  fetch('/api/ultimos?desde=' + visUltimo).then(function(r){ return r.json(); }).then(function(d){
+    var feed = document.getElementById('vFeed');
+    if(!feed) return;
+    (d.eventos || []).forEach(function(ev){
+      var nada = feed.querySelector('.vis-nada'); if(nada) nada.remove();
+      var esWA = ev.tipo === 'whatsapp';
+      var hora = new Date(ev.t).toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
+      var el = document.createElement('div');
+      el.className = 'vis-ev' + (esWA ? ' wa' : '');
+      el.innerHTML = '<div>' + (esWA ? '💬' : '👀') + '</div>' +
+        '<div class="t">' + (esWA ? '<b>¡Quieren escribirte!</b> Tocó WhatsApp'
+                                  : 'Visita desde <b>' + visDeDonde(ev.origen) + '</b>' + (ev.movil ? ' · celular' : '')) + '</div>' +
+        '<div class="h">' + hora + '</div>';
+      feed.insertBefore(el, feed.firstChild);
+      while(feed.children.length > 20) feed.removeChild(feed.lastChild);
+    });
+    if(d.eventos && d.eventos.length){ visUltimo = d.eventos[d.eventos.length-1].t; visCargar(); }
+  }).catch(function(){});
+}
+
+function visExcluirme(){
+  var puesto = /lunaro_admin=1/.test(document.cookie);
+  document.cookie = puesto ? 'lunaro_admin=0; path=/; max-age=0'
+                           : 'lunaro_admin=1; path=/; max-age=31536000';
+  visPintarBoton();
+}
+function visPintarBoton(){
+  var b = document.getElementById('vBtnExcluir');
+  if(b) b.textContent = /lunaro_admin=1/.test(document.cookie)
+    ? 'Volver a contar mis visitas' : 'No contar mis visitas';
+}
+
+visPintarBoton();
+visCargar();
+visEnVivo();
+setInterval(visEnVivo, 5000);
+setInterval(visCargar, 60000);
+</script>
 </body>
 </html>

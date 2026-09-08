@@ -1499,3 +1499,179 @@ img.tech-logo:hover {
         background: color-mix(in srgb, var(--dynamic-bg, #1e534f) 20%, #ffffff);
     }
 }
+
+
+/* ===============================================================
+   Botón de modo oscuro / claro
+   Vive en el extremo izquierdo del encabezado, al lado del logo,
+   como contrapeso del botón de WhatsApp que está a la derecha.
+   =============================================================== */
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.tema-btn {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: var(--apple-btn-bg);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+.tema-btn:hover {
+    background: var(--apple-btn-hover);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: rotate(-12deg);
+}
+.tema-btn svg {
+    width: 19px;
+    height: 19px;
+}
+/* En oscuro se ve el sol (lo que vas a activar); en claro, la luna. */
+.tema-btn .ico-luna { display: none; }
+.tema-btn .ico-sol { display: block; }
+body.modo-claro .tema-btn .ico-luna { display: block; }
+body.modo-claro .tema-btn .ico-sol { display: none; }
+
+/* ===============================================================
+   Modo claro
+   La web sigue naciendo en oscuro. Esto solo se aplica cuando el
+   visitante pulsa el botón, y se recuerda en su navegador.
+   =============================================================== */
+body.modo-claro {
+    background-color: #eef2f7;
+    background-image: radial-gradient(circle at 30% 20%, #ffffff 0%, #e6ecf5 55%, #dde5f0 100%);
+    color: #10151f;
+}
+
+/* Encabezado */
+body.modo-claro .logo-text,
+body.modo-claro .nav-links a,
+body.modo-claro .tema-btn { color: #10151f; }
+body.modo-claro .tema-btn {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.14);
+}
+body.modo-claro .tema-btn:hover { background: rgba(0, 0, 0, 0.1); }
+body.modo-claro .apple-music-btn,
+body.modo-claro .search-btn {
+    background: rgba(0, 0, 0, 0.06);
+    color: #10151f;
+}
+body.modo-claro .apple-music-btn:hover,
+body.modo-claro .search-btn:hover { background: rgba(0, 0, 0, 0.12); }
+
+/* Textos secundarios */
+body.modo-claro .section-header p,
+body.modo-claro .service-card p,
+body.modo-claro .faq-item p,
+body.modo-claro .about-text > p,
+body.modo-claro .benefit-item p,
+body.modo-claro .cta-section p,
+body.modo-claro .plans-foot,
+body.modo-claro .plan-for,
+body.modo-claro .footer-line,
+body.modo-claro .footer-content p,
+body.modo-claro .payment-methods p,
+body.modo-claro .cell-artist,
+body.modo-claro .hero-lead { color: rgba(16, 21, 31, 0.68); }
+
+body.modo-claro .plan-note { color: rgba(16, 21, 31, 0.55); }
+body.modo-claro .plan-note { border-top-color: rgba(0, 0, 0, 0.1); }
+
+/* Fondos de sección: eran negros translúcidos, ahora claros */
+body.modo-claro .services-section {
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.035) 100%);
+}
+body.modo-claro .faq-section,
+body.modo-claro .benefits-section { background: rgba(255, 255, 255, 0.6); }
+
+/* Tarjetas de vidrio */
+body.modo-claro .service-card.glass,
+body.modo-claro .plan-card,
+body.modo-claro .faq-item,
+body.modo-claro .benefit-item .icon-wrapper,
+body.modo-claro .tech-chip {
+    background: rgba(255, 255, 255, 0.75);
+    border-color: rgba(0, 0, 0, 0.09);
+}
+body.modo-claro .service-card.glass:hover,
+body.modo-claro .faq-item:hover { background: rgba(255, 255, 255, 0.95); }
+body.modo-claro .plan-featured { background: rgba(255, 255, 255, 0.95); }
+body.modo-claro .faq-item[open] {
+    background: rgba(77, 166, 255, 0.09);
+    border-color: rgba(77, 166, 255, 0.35);
+}
+
+/* Botones de borde blanco */
+body.modo-claro .plan-btn,
+body.modo-claro .hero-btn-ghost {
+    color: #10151f;
+    border-color: rgba(0, 0, 0, 0.28);
+}
+body.modo-claro .plan-btn:hover,
+body.modo-claro .hero-btn-ghost:hover {
+    background: rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.5);
+}
+/* Los botones verdes de WhatsApp se quedan como están: son la llamada a la acción */
+
+/* Flechas y puntos del carrusel */
+body.modo-claro .nav-btn {
+    background: rgba(0, 0, 0, 0.06);
+    color: #10151f;
+}
+body.modo-claro .nav-btn:hover { background: rgba(0, 0, 0, 0.12); }
+body.modo-claro .dot { background: rgba(0, 0, 0, 0.2); }
+body.modo-claro .dot.active { background: #10151f; }
+
+/* Franja de logos: en claro necesitan fundirse con blanco, no con negro */
+body.modo-claro .tech-marquee::before {
+    background: linear-gradient(to right, #eef2f7, transparent);
+}
+body.modo-claro .tech-marquee::after {
+    background: linear-gradient(to left, #eef2f7, transparent);
+}
+body.modo-claro .tech-logo { filter: none; }
+
+/* Pie */
+body.modo-claro .footer {
+    background: #e2e8f2;
+    border-top-color: rgba(0, 0, 0, 0.07);
+}
+body.modo-claro .social-link {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.12);
+    color: #10151f;
+}
+
+/* El 404 del logo: en claro el "apagón" tiene que ser gris, no negro */
+body.modo-claro .logo-highlight { animation: none; color: #1a7fd4; }
+
+/* Celular: el botón no debe empujar al logo fuera de la pantalla */
+@media (max-width: 900px) {
+    .nav-left { gap: 10px; }
+    .tema-btn { width: 36px; height: 36px; flex: 0 0 36px; }
+}
+
+/* Textos que traían blanco fijo y en claro quedaban invisibles */
+body.modo-claro .plan-price,
+body.modo-claro .plan-cur,
+body.modo-claro .plan-list li,
+body.modo-claro .about-stat strong,
+body.modo-claro .hero-lead strong,
+body.modo-claro .cell-title { color: #10151f; }
+
+body.modo-claro .plan-name,
+body.modo-claro .about-stat span { color: rgba(16, 21, 31, 0.6); }
+
+/* El logo de AWS venía forzado a blanco con estilo en línea */
+body.modo-claro .tech-logo[alt="AWS"] { filter: none !important; }

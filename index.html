@@ -33,7 +33,7 @@
     <meta name="twitter:description" content="Páginas web para negocios de Lima, con botón de WhatsApp y listas para Google. Entrega en 2 a 7 días. Desde S/300.">
     <meta name="twitter:image" content="https://lunaro404.com/og-image.png">
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=202609080232">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 
     <!-- Datos estructurados para Google (negocio local + FAQ) -->
@@ -181,8 +181,14 @@
 </head>
 <body>
     <nav class="navbar">
-        <div class="logo">
-            <span class="logo-text">LUNA<span class="logo-highlight">RO</span></span>
+        <div class="nav-left">
+            <button type="button" id="btnTema" class="tema-btn" aria-label="Cambiar entre modo oscuro y claro" title="Modo oscuro / claro">
+                <svg class="ico-luna" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <svg class="ico-sol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.2M12 19.8V22M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2 12h2.2M19.8 12H22M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg>
+            </button>
+            <div class="logo">
+                <span class="logo-text">LUNA<span class="logo-highlight">RO</span></span>
+            </div>
         </div>
         <ul class="nav-links">
             <li><a href="#portafolio">Portafolio</a></li>
@@ -492,5 +498,34 @@ document.addEventListener('click', function (e) {
 }, true);
 </script>
 
+
+<script>
+// ---------------------------------------------------------------
+// Modo oscuro / claro.
+// La web nace en oscuro, que es como esta pensada. El boton guarda
+// la eleccion en el navegador para que al volver siga igual.
+// ---------------------------------------------------------------
+(function () {
+  var CLAVE = 'lunaro-tema';
+  var cuerpo = document.body;
+
+  function aplicar(tema) {
+    cuerpo.classList.toggle('modo-claro', tema === 'claro');
+    var b = document.getElementById('btnTema');
+    if (b) b.setAttribute('aria-pressed', tema === 'claro' ? 'true' : 'false');
+  }
+
+  var guardado = null;
+  try { guardado = localStorage.getItem(CLAVE); } catch (e) {}
+  aplicar(guardado || 'oscuro');
+
+  var boton = document.getElementById('btnTema');
+  if (boton) boton.addEventListener('click', function () {
+    var claro = !cuerpo.classList.contains('modo-claro');
+    aplicar(claro ? 'claro' : 'oscuro');
+    try { localStorage.setItem(CLAVE, claro ? 'claro' : 'oscuro'); } catch (e) {}
+  });
+})();
+</script>
 </body>
 </html>

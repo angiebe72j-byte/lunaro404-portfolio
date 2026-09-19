@@ -31,10 +31,26 @@ async function loadDataAndInit() {
 // Version ligera para el carrusel: Cloudinary entrega el video ya comprimido
 // y al ancho en que realmente se ve (~500px), en vez del archivo original de
 // 80 MB. Se ve igual en pantalla, pero pesa una fraccion.
+// Las tarjetas del carrusel son un avance, no el video completo: el carrusel
+// gira solo cada 4 segundos, asi que nadie llega a ver mas de unos segundos de
+// cada una. Se piden a Cloudinary recortadas a 8 segundos y a 480px de ancho
+// (du_8): pasan de 2,6 MB a unos 220 KB cada una. El video entero, en calidad
+// buena, se sirve al abrir el modal.
 function versionLigera(url) {
     if (!url || url.indexOf('/video/upload/') === -1) return url;
     if (/\/upload\/(f_auto|f_mp4|q_auto|w_)/.test(url)) return url;
-    return url.replace('/video/upload/', '/video/upload/f_auto,q_auto:good,w_900,c_limit/');
+    return url.replace('/video/upload/', '/video/upload/f_auto,q_auto:eco,w_480,c_limit,du_8/');
+}
+
+// Imagen fija del segundo 2 del video. Las tarjetas la muestran mientras el
+// video no se reproduce: pesa unos 30 KB en vez de 2 MB. Sin esto, el carrusel
+// gira solo cada 4 segundos y en medio minuto habia descargado los 8 videos
+// enteros (11 MB) aunque el visitante solo estuviera leyendo la portada.
+function versionPoster(url) {
+    if (!url || url.indexOf('/video/upload/') === -1) return '';
+    return url
+        .replace('/video/upload/', '/video/upload/so_2,w_600,c_limit,q_auto/')
+        .replace(/\.(mp4|webm|mov|m4v)(\?.*)?$/i, '.jpg');
 }
 
 // Version para el modal (pantalla completa). Se fuerza MP4 a 1280px por tres
@@ -89,7 +105,7 @@ function initRoulette() {
         } else if (data.videoUrl) {
             mediaHtml = `
                 <div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 16px; position: relative; background: ${data.bgColor}; cursor: pointer;" onclick="openVideoModal('${data.videoUrl}')">
-                    <video class="cell-video" preload="metadata" src="${versionLigera(data.videoUrl)}" data-original="${data.videoUrl}" onerror="if(this.src!==this.dataset.original){this.src=this.dataset.original;}" style="width: 100%; height: 100%; object-fit: cover;" loop muted playsinline></video>
+                    <video class="cell-video" preload="none" poster="${versionPoster(data.videoUrl)}" src="${versionLigera(data.videoUrl)}" data-original="${data.videoUrl}" onerror="if(this.src!==this.dataset.original){this.src=this.dataset.original;}" style="width: 100%; height: 100%; object-fit: cover;" loop muted playsinline></video>
                     <div style="position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.1); transition: background 0.3s;" onmouseover="this.style.background='rgba(0,0,0,0.4)'" onmouseout="this.style.background='rgba(0,0,0,0.1)'">
                         <svg viewBox="0 0 24 24" fill="white" style="width: 50px; height: 50px; opacity: 0.8; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));"><path d="M8 5v14l11-7z"/></svg>
                     </div>
@@ -175,10 +191,13 @@ function initRoulette() {
             if (distance === 0) {
                 // Center, active card (Perfectly clear, full color)
                 cell.style.filter = 'blur(0px) brightness(1) saturate(1)';
-                // Restart video when active
+                // Restart video when active. Con preload="none" el archivo aun
+                // no existe en memoria: mover currentTime antes de tiempo falla,
+                // asi que solo se reinicia si ya hay algo cargado.
                 if (video) {
-                    video.currentTime = 0;
-                    video.play();
+                    if (video.readyState > 0) video.currentTime = 0;
+                    const p = video.play();
+                    if (p && p.catch) p.catch(() => {});
                 }
             } else if (distance === 1) {
                 // Immediate left/right cards (Distorted, dark, desaturated)

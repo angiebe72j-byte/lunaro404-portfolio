@@ -30,12 +30,25 @@ async function loadDataAndInit() {
 
 // Version ligera para el carrusel: Cloudinary entrega el video ya comprimido
 // y al ancho en que realmente se ve (~500px), en vez del archivo original de
-// 80 MB. Se ve igual en pantalla, pero pesa una fraccion. Al abrir el modal se
-// usa la URL original, en calidad completa.
+// 80 MB. Se ve igual en pantalla, pero pesa una fraccion.
 function versionLigera(url) {
     if (!url || url.indexOf('/video/upload/') === -1) return url;
-    if (/\/upload\/(f_auto|q_auto|w_)/.test(url)) return url;
+    if (/\/upload\/(f_auto|f_mp4|q_auto|w_)/.test(url)) return url;
     return url.replace('/video/upload/', '/video/upload/f_auto,q_auto:good,w_900,c_limit/');
+}
+
+// Version para el modal (pantalla completa). Se fuerza MP4 a 1280px por tres
+// motivos:
+//   1. Peso: los originales pesan hasta 80 MB y tardaban una eternidad.
+//   2. Adelantar: los .webm grabados en el navegador no traen indice de
+//      busqueda, asi que la barra de progreso no dejaba saltar a otro momento.
+//   3. iPhone: Safari no reproduce webm/VP9, por eso esos videos se veian en
+//      negro (parecia que habian "desaparecido").
+// Cloudinary convierte una sola vez y luego lo sirve desde su cache.
+function versionModal(url) {
+    if (!url || url.indexOf('/video/upload/') === -1) return url;
+    if (/\/upload\/(f_mp4|f_auto)/.test(url)) return url;
+    return url.replace('/video/upload/', '/video/upload/f_mp4,vc_auto,q_auto,w_1280,c_limit/');
 }
 
 function initRoulette() {
@@ -76,7 +89,7 @@ function initRoulette() {
         } else if (data.videoUrl) {
             mediaHtml = `
                 <div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 16px; position: relative; background: ${data.bgColor}; cursor: pointer;" onclick="openVideoModal('${data.videoUrl}')">
-                    <video class="cell-video" preload="metadata" src="${versionLigera(data.videoUrl)}" data-original="${data.videoUrl}" onerror="if(this.src!==this.dataset.original){this.src=this.dataset.original;}" style="width: 100%; height: 100%; object-fit: cover;" autoplay loop muted playsinline></video>
+                    <video class="cell-video" preload="metadata" src="${versionLigera(data.videoUrl)}" data-original="${data.videoUrl}" onerror="if(this.src!==this.dataset.original){this.src=this.dataset.original;}" style="width: 100%; height: 100%; object-fit: cover;" loop muted playsinline></video>
                     <div style="position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.1); transition: background 0.3s;" onmouseover="this.style.background='rgba(0,0,0,0.4)'" onmouseout="this.style.background='rgba(0,0,0,0.1)'">
                         <svg viewBox="0 0 24 24" fill="white" style="width: 50px; height: 50px; opacity: 0.8; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));"><path d="M8 5v14l11-7z"/></svg>
                     </div>
@@ -280,7 +293,12 @@ document.body.insertAdjacentHTML('beforeend', modalHtml);
 window.openVideoModal = function(url) {
     const modal = document.getElementById('videoModal');
     const video = document.getElementById('modalVideo');
-    video.src = url;
+    const ligera = versionModal(url);
+    // Si la version convertida fallara, se cae al archivo original.
+    video.onerror = function() {
+        if (video.src !== url) video.src = url;
+    };
+    video.src = ligera;
     modal.style.display = 'flex';
     video.play();
 }

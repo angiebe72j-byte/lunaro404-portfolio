@@ -294,9 +294,16 @@ window.openVideoModal = function(url) {
     const modal = document.getElementById('videoModal');
     const video = document.getElementById('modalVideo');
     const ligera = versionModal(url);
-    // Si la version convertida fallara, se cae al archivo original.
+    // Si la version convertida fallara, se cae al archivo original. Solo una
+    // vez: al cerrar el modal se vacia el src, y eso tambien dispara 'error'.
+    // Sin esta guarda, el video se volvia a cargar solo y seguia sonando.
+    let yaReintento = false;
     video.onerror = function() {
-        if (video.src !== url) video.src = url;
+        if (!video.getAttribute('src')) return; // cierre del modal, no es fallo
+        if (yaReintento) return;
+        yaReintento = true;
+        video.src = url;
+        video.play();
     };
     video.src = ligera;
     modal.style.display = 'flex';
@@ -307,8 +314,10 @@ window.closeVideoModal = function() {
     const modal = document.getElementById('videoModal');
     const video = document.getElementById('modalVideo');
     modal.style.display = 'none';
+    video.onerror = null;          // que cerrar no se confunda con un fallo
     video.pause();
-    video.src = '';
+    video.removeAttribute('src');
+    video.load();                  // corta la descarga y suelta el sonido
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
 }
 

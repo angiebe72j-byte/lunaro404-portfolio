@@ -427,6 +427,36 @@ app.get('/salud', (req, res) => {
     res.json({ ok: true, hora: new Date().toISOString() });
 });
 
+// ---------------------------------------------------------------
+// Banco de pruebas del bot de WhatsApp.
+//
+// Sirve para comprobar que Gemini responde bien ANTES de conectar el numero
+// de WhatsApp. Cada llamada gasta credito de Gemini, asi que se limita a 30
+// por hora: es una ruta de prueba, no la que atendera a los clientes.
+// ---------------------------------------------------------------
+const bot = require('./bot');
+let pruebasBot = [];
+
+app.post('/api/bot/probar', async (req, res) => {
+    const ahora = Date.now();
+    pruebasBot = pruebasBot.filter(t => ahora - t < 60 * 60 * 1000);
+    if (pruebasBot.length >= 30) {
+        return res.status(429).json({ error: 'Demasiadas pruebas en la ultima hora' });
+    }
+    pruebasBot.push(ahora);
+
+    const { mensaje, historial } = req.body || {};
+    if (!mensaje) return res.status(400).json({ error: 'Falta el mensaje' });
+
+    try {
+        const texto = await bot.responder(mensaje, historial || []);
+        res.json({ respuesta: texto, avisarAGian: bot.pideCerrar(mensaje) });
+    } catch (e) {
+        console.error('[bot] fallo:', e && e.message);
+        res.status(500).json({ error: e && e.message });
+    }
+});
+
 // Manejador de errores: sin esto, cuando Cloudinary rechaza una subida el
 // fallo se pierde y el panel solo muestra "Error al guardar" sin explicar
 // nada. Aqui se registra el motivo real y se devuelve al navegador.

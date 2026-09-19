@@ -90,7 +90,18 @@ async function elegirModelo(clave) {
         (m.supportedGenerationMethods || []).includes('generateContent')
     );
 
-    const flash = utiles.filter(m => /flash/i.test(m.name) && !/lite|vision|embedding/i.test(m.name));
+    // Ojo: la lista trae tambien modelos viejos que Google ya no acepta para
+    // cuentas nuevas (gemini-2.5-flash, por ejemplo). Por eso no vale tomar el
+    // primero: se ordena por numero de version y se usa el mas alto.
+    const version = n => {
+        const m = n.match(/gemini-(\d+)\.(\d+)/);
+        return m ? Number(m[1]) * 100 + Number(m[2]) : 0;
+    };
+
+    const flash = utiles
+        .filter(m => /flash/i.test(m.name) && !/lite|vision|embedding|thinking/i.test(m.name))
+        .sort((a, b) => version(b.name) - version(a.name));
+
     const elegido = (flash[0] || utiles[0]);
     if (!elegido) throw new Error('La cuenta no tiene modelos disponibles');
 
@@ -100,7 +111,7 @@ async function elegirModelo(clave) {
 }
 
 // historial: [{ de: 'cliente'|'bot', texto: '...' }]
-async function responder(mensaje, historial = []) {
+async function responder(mensaje, historial = [], reintento = false) {
     const clave = process.env.GEMINI_API_KEY;
     if (!clave) throw new Error('Falta la variable GEMINI_API_KEY');
 
@@ -127,6 +138,17 @@ async function responder(mensaje, historial = []) {
 
     if (!r.ok) {
         const detalle = await r.text();
+
+        // Cuando Google retira un modelo, el propio error dice cual usar en su
+        // lugar. Se cambia al recomendado y se reintenta una vez, para que el
+        // bot no se quede caido esperando a que alguien toque el codigo.
+        const sugerido = detalle.match(/use\s+models\/([a-z0-9.\-]+)/i);
+        if (r.status === 404 && sugerido && !reintento) {
+            console.log('[bot] modelo retirado, cambiando a:', sugerido[1]);
+            modeloElegido = sugerido[1];
+            return responder(mensaje, historial, true);
+        }
+
         throw new Error('Gemini respondio ' + r.status + ': ' + detalle.slice(0, 300));
     }
 

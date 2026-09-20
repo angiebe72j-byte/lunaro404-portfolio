@@ -176,6 +176,60 @@
             alturaMeta = 0;
         },
 
+        // Patada: se apoya en una pierna y estira la otra al frente.
+        patea: function () {
+            poner({
+                pD: -96, pDi: 6, pT: 24, pTi: 16,
+                bD: 58, bDi: 28, bT: -66, bTi: 34,
+                tronco: 13, cab: -6
+            });
+            alturaMeta = 6;
+        },
+
+        // Samurai. Es una coreografia corta que se repite: guardia,
+        // corte, guardia otra vez. Los cortes son rapidos y las guardias
+        // lentas: eso es lo que lo hace leer como pelea y no como un
+        // brazo dando vueltas.
+        samurai: function (t) {
+            var f = (t * 1.35) % 3, a;
+            if (f < 0.9)       a = { bD: -138, bDi: -46, pD: -28, pT:  30, tronco:  -5, cab:  -8 };
+            else if (f < 1.25) a = { bD:  -34, bDi:  -8, pD: -44, pT:  40, tronco:  13, cab:   6 };
+            else if (f < 1.9)  a = { bD:   44, bDi:  18, pD: -18, pT:  22, tronco:   4, cab:  -4 };
+            else if (f < 2.25) a = { bD: -112, bDi: -34, pD:  34, pT: -36, tronco: -12, cab: -12 };
+            else               a = { bD: -120, bDi: -40, pD: -10, pT:  12, tronco:  -3, cab:  -6 };
+
+            poner({
+                bD: a.bD, bDi: a.bDi, bT: -26, bTi: 42,
+                pD: a.pD, pDi: 26, pT: a.pT, pTi: 26,
+                tronco: a.tronco, cab: a.cab
+            });
+            alturaMeta = 10;
+        },
+
+        // Sentadillas: baja y sube con los brazos al frente.
+        sentadilla: function (t) {
+            var r = Math.sin(t * 3.4);
+            poner({
+                pD: -18 - r * 26, pDi: 42 + r * 46,
+                pT: -14 - r * 26, pTi: 42 + r * 46,
+                bD: -86, bDi: -8, bT: -80, bTi: -8,
+                tronco: 6 + r * 6, cab: -4
+            });
+            alturaMeta = 24 + r * 22;
+        },
+
+        // Saltos de tijera: piernas y brazos abren y cierran a la vez.
+        tijera: function (t) {
+            var abierto = (Math.sin(t * 6.5) + 1) / 2;
+            poner({
+                pD: -22 * abierto, pDi: 4, pT: 22 * abierto, pTi: 4,
+                bD: -20 - 140 * abierto, bDi: -6,
+                bT:  20 + 140 * abierto, bTi: -6,
+                tronco: 0, cab: -2 - 4 * abierto
+            });
+            alturaMeta = -10 * abierto;
+        },
+
         // Deslizada: una pierna estirada adelante, el cuerpo echado
         // atras y el brazo buscando el piso. La frenada del ninja.
         desliza: function () {
@@ -226,8 +280,10 @@
     // 3. EL MUNDO: plataformas y escondites de verdad
     // ----------------------------------------------------------------
     // Todo lo que sirve de escalon: titulares, tarjetas, botones, la foto.
+    // La barra de arriba y el boton de WhatsApp tambien son suelo: por eso
+    // puede salir parado junto al logo y treparse al boton verde.
     var SITIOS = 'h2, .plan-card, .service-card, .faq-item, .about-avatar-circle, ' +
-                 '.cta-btn, .plan-btn, .section-header p, .hero-lead';
+                 '.cta-btn, .plan-btn, .section-header p, .hero-lead, .navbar .logo, .fab-button';
     var mundo = [];
     var mundoViejo = 0;
 
@@ -267,7 +323,7 @@
     // Guion y frases
     // ----------------------------------------------------------------
     var GUION = [
-        { id: 'portafolio', texto: '¡Hola! 👋 Soy el guía de LUNARO' },
+        { id: 'portafolio', texto: '¡Hola! Soy LUNARO 👋' },
         { id: 'servicios',  texto: 'Esto es lo que hago por tu negocio' },
         { id: 'planes',     texto: '👉 Acá están los precios: desde S/300' },
         { id: 'beneficios', texto: 'Todo esto va incluido, sin letra chica' },
@@ -276,8 +332,26 @@
         { id: 'contacto',   texto: 'Escríbele y te dice qué plan te conviene 💬' }
     ];
 
-    var COSQUILLAS = ['¡Ey! 😄', 'Acá no hay gravedad 🚀',
-                      '¿Bajamos a ver los precios?', '¡Wiiii!', 'Sigue mirando, hay más 👀'];
+    var COSQUILLAS = [
+        '¡Ey! 😄', 'Acá no hay gravedad 🚀', '¡Wiiii!',
+        '¿Bajamos a ver los precios?', 'Sigue mirando, hay más 👀',
+        '¡Otra vez! 😆', 'Me hiciste cosquillas', '¡Cuidado, que despego!',
+        'Soy LUNARO, mucho gusto 🤝', '¿Jugamos?'
+    ];
+
+    // Frases sueltas que suelta mientras anda en lo suyo.
+    var OCURRENCIAS = [
+        'Esta web la hizo Gian 👨‍💻',
+        'Tu negocio puede verse así de bien',
+        'Desde S/300 y con dominio incluido',
+        'Entrega en 2 a 7 días ⚡',
+        '¿Tienes un negocio? Te va a servir',
+        'Acá abajo está el WhatsApp 👇',
+        'Yo vivo acá, tú solo mira',
+        'Todo se ve bien en el celular también 📱',
+        'Mira el portafolio, son webs reales',
+        '¡Entrenando para el próximo proyecto! 💪'
+    ];
 
     var dichas = {}, tCallar = null;
 
@@ -288,6 +362,56 @@
         mascota.classList.add('habla');
         clearTimeout(tCallar);
         tCallar = setTimeout(function () { mascota.classList.remove('habla'); }, cuanto || 4200);
+    }
+
+    // ----------------------------------------------------------------
+    // El boton de WhatsApp, que aqui ademas hace de pelota
+    // ----------------------------------------------------------------
+    var fab = document.querySelector('.fab-button');
+    var fabVolando = false;
+
+    // Sale disparado con su propia fisica, rebota en el piso, se va de
+    // pantalla y vuelve a su sitio a los 3 segundos. Es el boton de
+    // verdad: mientras tanto sigue siendo el enlace a WhatsApp.
+    function lanzarFab() {
+        if (!fab || fabVolando) return;
+        fabVolando = true;
+
+        var bx = 0, by = 0, bvx = 820 + Math.random() * 380, bvy = -820;
+        var vuelta = 0, vueltaVel = 700 + Math.random() * 500;
+        var antesB = performance.now();
+
+        (function vuela(ahora) {
+            var d = Math.min((ahora - antesB) / 1000, 0.05);
+            antesB = ahora;
+
+            bvy += 2400 * d;
+            bx += bvx * d;
+            by += bvy * d;
+            vuelta += vueltaVel * d;
+
+            fab.style.transform = 'translate(' + bx.toFixed(0) + 'px,' + by.toFixed(0) +
+                'px) rotate(' + vuelta.toFixed(0) + 'deg)';
+
+            var r = fab.getBoundingClientRect();
+            if (r.bottom > window.innerHeight && bvy > 0) {
+                by -= (r.bottom - window.innerHeight);
+                bvy = -bvy * 0.55;        // el rebote, cada vez mas bajito
+                bvx *= 0.85;
+            }
+
+            if (r.left < window.innerWidth + 60) {
+                requestAnimationFrame(vuela);
+            } else {
+                fab.style.opacity = '0';
+                setTimeout(function () {
+                    fab.style.transition = 'transform .45s cubic-bezier(.3,1.7,.5,1), opacity .2s ease';
+                    fab.style.transform = '';
+                    fab.style.opacity = '1';
+                    setTimeout(function () { fab.style.transition = ''; fabVolando = false; }, 600);
+                }, 3000);
+            }
+        })(antesB);
     }
 
     // ----------------------------------------------------------------
@@ -327,7 +451,7 @@
         gesto = 'cartel';
         mira = 1;
         mascota.classList.add('cartel');
-        esperar(3.2, function () {
+        esperar(2.4, function () {
             mascota.classList.remove('cartel');
             gesto = null;
             esperar(0.3, decidir);
@@ -361,6 +485,71 @@
         });
     }
 
+    // Corre hasta el boton de WhatsApp y lo patea como pelota.
+    function patearBoton() {
+        if (!fab || fabVolando) { decidir(); return; }
+        var r = fab.getBoundingClientRect();
+        if (r.width < 10) { decidir(); return; }   // en celular esta oculto hasta deslizar
+
+        irA(r.left - an * 0.8, true, function () {
+            mira = 1;
+            gesto = 'patea';
+            decir(alAzar(['¡Toma! ⚽', '¡Gol!', '¡Ahí va!']), 1500);
+            esperar(0.3, function () {
+                lanzarFab();
+                gesto = null;
+                esperar(0.6, decidir);
+            });
+        });
+    }
+
+    // Se trepa al boton verde y se queda parado encima.
+    function subirseAlFab() {
+        if (!fab || fabVolando) { decidir(); return; }
+        var r = fab.getBoundingClientRect();
+        if (r.width < 10) { decidir(); return; }
+
+        irA(r.left + r.width / 2 - an / 2, true, function () {
+            saltar(Math.min(1500, 780 + (window.innerHeight - r.top - MARGEN) * 2.2));
+            esperar(1.1, function () {
+                if (plataforma) {
+                    decir(alAzar(['Desde acá se ve todo 👀',
+                                  'Este botón es el importante 👇',
+                                  '¿Me escribes?']), 2200);
+                }
+                esperar(1, function () { saltar(760); esperar(0.5, decidir); });
+            });
+        });
+    }
+
+    // Saca la katana y hace su coreografia de samurai.
+    function samurai() {
+        gesto = 'samurai';
+        mascota.classList.add('espada');
+        decir(alAzar(['¡Hi-ya! ⚔️', 'Modo samurái', '¡Shaa!']), 2000);
+        esperar(2.4, function () {
+            saltar(1050);                     // remata con un corte en el aire
+            esperar(1.1, function () {
+                mascota.classList.remove('espada');
+                gesto = null;
+                esperar(0.3, decidir);
+            });
+        });
+    }
+
+    // Rutina de ejercicios, para que tambien lo vean entrenando.
+    function ejercicio() {
+        var cual = Math.random() < 0.5 ? 'sentadilla' : 'tijera';
+        gesto = cual;
+        decir(cual === 'sentadilla'
+            ? alAzar(['Sentadillas 💪', 'Una más...', 'Hay que estar en forma'])
+            : alAzar(['¡Calentando! 🏃', 'Uno, dos, uno, dos', 'Cardio espacial']), 2400);
+        esperar(3, function () {
+            gesto = null;
+            esperar(0.3, decidir);
+        });
+    }
+
     // Voltereta: salta y gira entero en el aire.
     function voltereta() {
         if (!enSuelo) { decidir(); return; }
@@ -373,25 +562,46 @@
         var dado = Math.random();
         var sitio = mundo.length ? alAzar(mundo) : null;
 
-        if (dado < 0.08) {
+        // Cada tanto comenta algo mientras sigue en lo suyo.
+        if (Math.random() < 0.18 && !mascota.classList.contains('habla')) {
+            decir(alAzar(OCURRENCIAS), 2800);
+        }
+
+        if (dado < 0.06) {
             // Sacar el cartel y mandar a escribirle a Gian.
             sacarCartel();
 
-        } else if (dado < 0.19) {
+        } else if (dado < 0.15) {
+            // Patear el boton de WhatsApp como pelota.
+            patearBoton();
+
+        } else if (dado < 0.22) {
+            // Treparse al boton verde.
+            subirseAlFab();
+
+        } else if (dado < 0.31) {
+            // Sacar la katana y jugar al samurai.
+            samurai();
+
+        } else if (dado < 0.38) {
+            // Ponerse a entrenar.
+            ejercicio();
+
+        } else if (dado < 0.46) {
             // Carrerita y frenada patinando.
             deslizada();
 
-        } else if (dado < 0.29) {
+        } else if (dado < 0.53) {
             // Rebotar contra el borde de la pantalla.
             rebotePared();
 
-        } else if (dado < 0.4) {
+        } else if (dado < 0.61) {
             // Voltereta, a veces con carrerita antes.
             if (Math.random() < 0.5) {
                 irA(Math.random() * (window.innerWidth - an), true, voltereta);
             } else voltereta();
 
-        } else if (sitio && dado < 0.52) {
+        } else if (sitio && dado < 0.72) {
             // Treparse encima de una tarjeta y caminar por el borde.
             var entrada = (x < sitio.x1) ? sitio.x1 + 20 : sitio.x2 - an - 20;
             irA(entrada, true, function () {
@@ -405,11 +615,11 @@
                 });
             });
 
-        } else if (sitio && dado < 0.82) {
+        } else if (sitio && dado < 0.88) {
             // Meterse detras de una tarjeta y asomar el casco.
             esconderseTras(sitio);
 
-        } else if (dado < 0.94) {
+        } else if (dado < 0.96) {
             // Cruzar corriendo de lado a lado.
             var lejos = (x < window.innerWidth / 2) ? window.innerWidth - an * 1.3 : an * 0.3;
             irA(lejos, true, function () {
@@ -632,7 +842,11 @@
 
         // --- que pose toca ---
         var rapidez = Math.abs(vx);
-        if (deslizando > 0) pose = 'desliza';
+        if (gesto === 'samurai' && enSuelo) pose = 'samurai';
+        else if (gesto === 'patea') pose = 'patea';
+        else if (gesto === 'sentadilla' && enSuelo) pose = 'sentadilla';
+        else if (gesto === 'tijera') pose = 'tijera';
+        else if (deslizando > 0) pose = 'desliza';
         else if (rodando > 0 || Math.abs(giroVel) > 1) pose = 'rueda';
         else if (gesto === 'espia') pose = 'espia';
         else if (gesto === 'cartel' && enSuelo) pose = 'cartel';
@@ -712,12 +926,33 @@
 
     requestAnimationFrame(cuadro);
 
-    setTimeout(function () {
+    // Entra en escena parado al costado del logo, sobre la barra de
+    // arriba: se presenta desde ahi y recien despues se tira a jugar.
+    // Empieza enseguida a proposito, para que lo primero que vea el
+    // visitante sea el personaje y no una pagina quieta.
+    (function presentarse() {
+        var logo = document.querySelector('.navbar .logo');
+        if (logo) {
+            var rl = logo.getBoundingClientRect();
+            // Parado sobre el logo, no flotando al lado: se le da esa
+            // plataforma a mano para que no se caiga en el primer cuadro.
+            plataforma = { el: logo, x1: rl.left, x2: rl.right, arriba: rl.top, abajo: rl.bottom };
+            // Su centro tiene que caer DENTRO del logo o la fisica lo deja
+            // caer en el primer cuadro por estar pisando el aire.
+            x = Math.min(window.innerWidth - an - 8, rl.right - an * 0.72);
+            y = Math.max(0, (window.innerHeight - MARGEN) - rl.top);
+            mira = 1;
+        }
+
         dichas.portafolio = true;
-        irA(window.innerWidth * 0.16, false, function () {
-            gesto = 'saluda';
-            decir(GUION[0].texto, 4200);
-            esperar(1.6, decidir);
-        });
-    }, 1300);
+        gesto = 'saluda';
+        decir(GUION[0].texto, 3600);
+
+        // Se despide del logo con un salto y se deja caer a la pagina.
+        setTimeout(function () {
+            gesto = null;
+            saltar(900);
+            esperar(1.2, decidir);
+        }, 2600);
+    })();
 })();

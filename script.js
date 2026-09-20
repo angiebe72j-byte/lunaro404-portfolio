@@ -325,10 +325,6 @@ function initRoulette() {
     });
 }
 
-document.querySelector('.close-tooltip').addEventListener('click', (e) => {
-    e.target.parentElement.style.display = 'none';
-});
-
 // Sticky Navbar effect on scroll
 window.addEventListener('scroll', () => {
     const navbar = document.querySelector('.navbar');

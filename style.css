@@ -784,37 +784,6 @@ img.tech-logo:hover {
     gap: 15px;
     z-index: 100;
 }
-.fab-tooltip {
-    background: white;
-    color: black;
-    padding: 15px 25px 15px 20px;
-    border-radius: 12px;
-    width: 260px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    position: relative;
-    font-size: 14px;
-    line-height: 1.4;
-    margin-bottom: 5px;
-}
-.fab-tooltip strong {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 16px;
-    font-weight: 800;
-}
-.fab-tooltip-short {
-    display: none; /* Solo se usa en móvil, ver media query */
-}
-.close-tooltip {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
-    border: none;
-    font-size: 18px;
-    cursor: pointer;
-    color: #999;
-}
 .fab-button {
     width: 65px;
     height: 65px;
@@ -1038,53 +1007,6 @@ img.tech-logo:hover {
         flex-direction: column;
         align-items: flex-end;
     }
-    /* Mensaje corto y compacto tipo burbuja de chat, no el cuadro grande de escritorio */
-    .fab-tooltip {
-        display: none;
-        width: auto;
-        max-width: 165px;
-        padding: 10px 26px 10px 14px;
-        border-radius: 14px;
-        font-size: 12.5px;
-        line-height: 1.3;
-        margin-bottom: 10px;
-        background: #1fae54;
-        color: white;
-        box-shadow: 0 12px 28px rgba(0,0,0,0.35);
-    }
-    /* Colita apuntando hacia el botón, como un globo de chat */
-    .fab-tooltip::after {
-        content: '';
-        position: absolute;
-        bottom: -7px;
-        right: 22px;
-        width: 14px;
-        height: 14px;
-        background: #1fae54;
-        transform: rotate(45deg);
-        border-radius: 0 0 4px 0;
-    }
-    .fab-tooltip strong {
-        display: none; /* En móvil solo el mensaje corto, sin título */
-    }
-    .fab-tooltip-long {
-        display: none;
-    }
-    .fab-tooltip-short {
-        display: block;
-        margin: 0;
-        font-weight: 700;
-    }
-    .close-tooltip {
-        top: 6px;
-        right: 8px;
-        font-size: 14px;
-        color: rgba(255,255,255,0.8);
-    }
-    .fab-container.is-visible .fab-tooltip {
-        display: block;
-    }
-
     /* Oculto hasta que el usuario empiece a deslizar (solo en móvil) */
     .fab-container {
         opacity: 0;
@@ -1591,6 +1513,25 @@ img.tech-logo:hover {
     pointer-events: auto;
     cursor: pointer;
 }
+
+/* La katana. Sale de la nada igual que el cartel: encogida y girada,
+   para que se lea como un desenvaine y no como una aparicion. */
+#espada {
+    opacity: 0;
+    transform: scale(.3) rotate(40deg);
+    transform-origin: 0 26px;
+    transition: opacity .12s ease, transform .3s cubic-bezier(.3,1.7,.5,1);
+    pointer-events: none;
+}
+
+.mascota.espada #espada {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+}
+
+.mascota-svg .hoja   { fill: #eef4ff; stroke-width: 3.5; }
+.mascota-svg .guarda { fill: #1e3a6d; stroke-width: 3.5; }
+.mascota-svg .mango  { fill: #16203c; stroke-width: 3.5; }
 
 .mascota-svg .palo  { fill: #cbd6e6; }
 .mascota-svg .tabla { fill: #ffffff; }

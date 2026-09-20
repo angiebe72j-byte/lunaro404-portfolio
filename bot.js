@@ -21,6 +21,8 @@ COMO HABLAS
 - Mensajes CORTOS: 2 a 4 lineas. Es WhatsApp, no un correo.
 - Sin palabras tecnicas: nada de "responsive", "hosting compartido", "SEO on page".
 - Puedes usar algun emoji, pero con medida: uno o dos por mensaje.
+- Para resaltar usa UN solo asterisco (*Plan Negocio*), que es como se pone
+  negrita en WhatsApp. Nunca uses dos asteriscos ni ## ni guiones de lista.
 - Nunca escribes parrafos largos ni listas de mas de 4 puntos.
 
 QUIEN ERES
@@ -111,7 +113,7 @@ async function elegirModelo(clave) {
 }
 
 // historial: [{ de: 'cliente'|'bot', texto: '...' }]
-async function responder(mensaje, historial = [], reintento = false, intentos = 0) {
+async function responder(mensaje, historial = [], reintento = false, intentos = 0, sinPensamiento = true) {
     const clave = process.env.GEMINI_API_KEY;
     if (!clave) throw new Error('Falta la variable GEMINI_API_KEY');
 
@@ -123,17 +125,26 @@ async function responder(mensaje, historial = [], reintento = false, intentos = 
     }));
     contents.push({ role: 'user', parts: [{ text: mensaje }] });
 
+    // Los modelos nuevos "piensan" antes de responder, y ese razonamiento se
+    // descuenta del mismo presupuesto de texto. Con un limite corto, la
+    // respuesta salia cortada a media frase. Aqui se apaga ese modo (no hace
+    // falta para atender WhatsApp, y ademas gasta mas credito) y se deja aire
+    // suficiente en maxOutputTokens.
+    const cuerpo = {
+        contents,
+        systemInstruction: { parts: [{ text: INSTRUCCIONES }] },
+        generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 1200,
+            thinkingConfig: { thinkingBudget: 0 }
+        }
+    };
+    if (sinPensamiento === false) delete cuerpo.generationConfig.thinkingConfig;
+
     const r = await fetch(`${API}/models/${modelo}:generateContent?key=${clave}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            contents,
-            systemInstruction: { parts: [{ text: INSTRUCCIONES }] },
-            generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 400
-            }
-        })
+        body: JSON.stringify(cuerpo)
     });
 
     if (!r.ok) {
@@ -146,17 +157,24 @@ async function responder(mensaje, historial = [], reintento = false, intentos = 
         if (r.status === 404 && sugerido && !reintento) {
             console.log('[bot] modelo retirado, cambiando a:', sugerido[1]);
             modeloElegido = sugerido[1];
-            return responder(mensaje, historial, true);
+            return responder(mensaje, historial, true, intentos, sinPensamiento);
         }
 
         // 503 (modelo saturado) y 429 (demasiadas consultas) son pasajeros y
         // salen seguido en el nivel gratuito. Sin reintentos, el cliente que
         // escribe justo en ese momento se queda sin respuesta.
+        // Si el modelo no acepta apagar el razonamiento, se reintenta sin esa
+        // opcion en vez de dejar al cliente sin respuesta.
+        if (r.status === 400 && /thinking/i.test(detalle) && sinPensamiento) {
+            console.log('[bot] el modelo no acepta thinkingConfig, reintentando sin el');
+            return responder(mensaje, historial, reintento, intentos, false);
+        }
+
         if ((r.status === 503 || r.status === 429) && intentos < 3) {
             const espera = 1200 * (intentos + 1);
             console.log(`[bot] ${r.status} de Gemini, reintentando en ${espera}ms`);
             await new Promise(ok => setTimeout(ok, espera));
-            return responder(mensaje, historial, reintento, intentos + 1);
+            return responder(mensaje, historial, reintento, intentos + 1, sinPensamiento);
         }
 
         throw new Error('Gemini respondio ' + r.status + ': ' + detalle.slice(0, 300));

@@ -33,7 +33,7 @@
     <meta name="twitter:description" content="Páginas web para negocios de Lima, con botón de WhatsApp y listas para Google. Entrega en 2 a 7 días. Desde S/300.">
     <meta name="twitter:image" content="https://lunaro404.com/og-image.png">
 
-    <link rel="stylesheet" href="style.css?v=202609200255">
+    <link rel="stylesheet" href="style.css?v=202609200320">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 
     <!-- Datos estructurados para Google (negocio local + FAQ) -->
@@ -499,7 +499,18 @@
         </div>
     </footer>
 
+    <!-- El astronauta guia: asoma cuando la persona deja de hacer scroll -->
+    <div class="mascota" id="mascota">
+        <div class="mascota-globo"></div>
+        <div class="mascota-figura">
+            <img class="astro-cuerpo" src="assets/astronauta-cuerpo.png" width="289" height="404" alt="" aria-hidden="true">
+            <img class="astro-brazo" src="assets/astronauta-brazo.png" width="289" height="404" alt="" aria-hidden="true">
+        </div>
+        <button type="button" class="mascota-cerrar" aria-label="Ocultar al astronauta gu&iacute;a">&times;</button>
+    </div>
+
     <script src="script.js?v=202609070055"></script>
+    <script src="mascota.js?v=202609200320" defer></script>
 <script>
 // Avisa al servidor cuando alguien toca un boton de WhatsApp
 document.addEventListener('click', function (e) {

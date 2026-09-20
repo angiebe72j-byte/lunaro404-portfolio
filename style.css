@@ -1605,3 +1605,120 @@ img.tech-logo:hover {
 @media (prefers-reduced-motion: reduce) {
     .astro, .astro-brazo { animation: none; }
 }
+
+/* ============================================================
+   EL ASTRONAUTA GUIA
+   Vive pegado abajo a la izquierda (a la derecha esta el boton de
+   WhatsApp, no deben chocar). Mientras la persona hace scroll se
+   aparta solo, y cuando se detiene asoma y senala la seccion.
+   ============================================================ */
+.mascota {
+    position: fixed;
+    left: 18px;
+    bottom: 22px;
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    transform: translateX(-160%);
+    opacity: 0;
+    transition: transform .55s cubic-bezier(.22,1,.36,1), opacity .35s ease;
+}
+
+.mascota.visible {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* El globo de dialogo, con su piquito apuntando al astronauta. */
+.mascota-globo {
+    position: relative;
+    max-width: 210px;
+    background: #ffffff;
+    color: #10151f;
+    font-size: .82rem;
+    font-weight: 600;
+    line-height: 1.35;
+    padding: 10px 13px;
+    border-radius: 14px;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, .45);
+}
+
+.mascota-globo::after {
+    content: '';
+    position: absolute;
+    left: 24px;
+    bottom: -7px;
+    width: 14px;
+    height: 14px;
+    background: #ffffff;
+    transform: rotate(45deg);
+    border-radius: 2px;
+}
+
+/* El personaje mira hacia la derecha (hacia el contenido), por eso se
+   voltea: asi el brazo que senala queda del lado de la pagina. */
+.mascota-figura {
+    position: relative;
+    width: 112px;
+    aspect-ratio: 289 / 404;
+    transform: scaleX(-1);
+    filter: drop-shadow(0 12px 18px rgba(0, 0, 0, .45));
+}
+
+.mascota-figura img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.mascota-figura .astro-brazo {
+    transform-origin: 32.9% 47%;
+}
+
+/* Pose 1: saludando, el brazo va y viene. */
+.mascota.saluda .astro-brazo {
+    animation: astro-saluda 1.1s ease-in-out infinite;
+}
+
+/* Pose 2: senalando, el brazo se queda estirado hacia el contenido y
+   solo da un golpecito, como quien dice "mira esto". */
+.mascota.senala .astro-brazo {
+    animation: astro-senala 1.4s ease-in-out infinite;
+}
+
+@keyframes astro-senala {
+    0%, 100% { transform: rotate(-26deg); }
+    50%      { transform: rotate(-36deg); }
+}
+
+/* La cruz para apagarlo. Si alguien la cierra, no vuelve a salir. */
+.mascota-cerrar {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, .25);
+    background: rgba(10, 16, 28, .9);
+    color: #fff;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mascota-cerrar:hover { background: #1b2a42; }
+
+@media (max-width: 768px) {
+    .mascota { left: 10px; bottom: 14px; }
+    .mascota-figura { width: 74px; }
+    .mascota-globo { font-size: .74rem; max-width: 60vw; padding: 8px 11px; }
+}

@@ -1607,64 +1607,31 @@ img.tech-logo:hover {
 }
 
 /* ============================================================
-   EL ASTRONAUTA GUIA
-   Vive pegado abajo a la izquierda (a la derecha esta el boton de
-   WhatsApp, no deben chocar). Mientras la persona hace scroll se
-   aparta solo, y cuando se detiene asoma y senala la seccion.
+   EL ASTRONAUTA QUE VIVE EN LA PAGINA
+   Aqui casi no hay animaciones: el movimiento lo calcula mascota.js
+   cuadro a cuadro (gravedad, impulso, rebote). El CSS solo pone la
+   estructura y deja listas las capas para que el navegador las mueva
+   en la tarjeta de video.
    ============================================================ */
 .mascota {
     position: fixed;
-    left: 18px;
-    bottom: 22px;
+    left: 0;
+    top: 0;
     z-index: 90;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    transform: translateX(-160%);
-    opacity: 0;
-    transition: transform .55s cubic-bezier(.22,1,.36,1), opacity .35s ease;
+    width: 112px;
+    will-change: transform;
+    pointer-events: none;
 }
 
-.mascota.visible {
-    transform: translateX(0);
-    opacity: 1;
-}
-
-/* El globo de dialogo, con su piquito apuntando al astronauta. */
-.mascota-globo {
-    position: relative;
-    max-width: 210px;
-    background: #ffffff;
-    color: #10151f;
-    font-size: .82rem;
-    font-weight: 600;
-    line-height: 1.35;
-    padding: 10px 13px;
-    border-radius: 14px;
-    box-shadow: 0 10px 26px rgba(0, 0, 0, .45);
-}
-
-.mascota-globo::after {
-    content: '';
-    position: absolute;
-    left: 24px;
-    bottom: -7px;
-    width: 14px;
-    height: 14px;
-    background: #ffffff;
-    transform: rotate(45deg);
-    border-radius: 2px;
-}
-
-/* El personaje mira hacia la derecha (hacia el contenido), por eso se
-   voltea: asi el brazo que senala queda del lado de la pagina. */
 .mascota-figura {
     position: relative;
-    width: 112px;
+    width: 100%;
     aspect-ratio: 289 / 404;
-    transform: scaleX(-1);
-    filter: drop-shadow(0 12px 18px rgba(0, 0, 0, .45));
+    transform-origin: 50% 100%;   /* los pies: es desde donde se impulsa */
+    cursor: pointer;
+    pointer-events: auto;
+    filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .45));
+    will-change: transform;
 }
 
 .mascota-figura img {
@@ -1673,33 +1640,78 @@ img.tech-logo:hover {
     width: 100%;
     height: auto;
     display: block;
+    pointer-events: none;
 }
 
 .mascota-figura .astro-brazo {
     transform-origin: 32.9% 47%;
+    will-change: transform;
 }
 
-/* Pose 1: saludando, el brazo va y viene. */
-.mascota.saluda .astro-brazo {
-    animation: astro-saluda 1.1s ease-in-out infinite;
+/* La sombra en el piso. Va fuera de la figura a proposito: cuando el
+   astronauta salta, la sombra se queda abajo y solo se achica. Eso es
+   lo que hace que se lea la altura del salto. */
+.mascota-sombra {
+    position: absolute;
+    left: 50%;
+    bottom: -4px;
+    width: 58%;
+    height: 11px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, .5);
+    filter: blur(4px);
+    transform: translateX(-50%);
+    pointer-events: none;
+    will-change: transform, opacity;
 }
 
-/* Pose 2: senalando, el brazo se queda estirado hacia el contenido y
-   solo da un golpecito, como quien dice "mira esto". */
-.mascota.senala .astro-brazo {
-    animation: astro-senala 1.4s ease-in-out infinite;
+/* ---------- El globo de dialogo ---------- */
+.mascota-globo {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-bottom: 10px;
+    transform: translateX(-50%) translateY(8px) scale(.9);
+    transform-origin: 50% 100%;
+    width: max-content;
+    max-width: 220px;
+    background: #ffffff;
+    color: #10151f;
+    font-size: .82rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: center;
+    padding: 10px 13px;
+    border-radius: 14px;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, .45);
+    opacity: 0;
+    transition: opacity .25s ease, transform .35s cubic-bezier(.34,1.5,.64,1);
+    pointer-events: none;
 }
 
-@keyframes astro-senala {
-    0%, 100% { transform: rotate(-26deg); }
-    50%      { transform: rotate(-36deg); }
+.mascota.habla .mascota-globo {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
 }
 
-/* La cruz para apagarlo. Si alguien la cierra, no vuelve a salir. */
+.mascota-globo::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -6px;
+    width: 13px;
+    height: 13px;
+    margin-left: -6px;
+    background: #ffffff;
+    transform: rotate(45deg);
+    border-radius: 2px;
+}
+
+/* ---------- La cruz para apagarlo ---------- */
 .mascota-cerrar {
     position: absolute;
-    top: -6px;
-    right: -6px;
+    top: -4px;
+    right: -8px;
     width: 22px;
     height: 22px;
     border-radius: 50%;
@@ -1710,15 +1722,19 @@ img.tech-logo:hover {
     line-height: 1;
     cursor: pointer;
     padding: 0;
+    pointer-events: auto;
+    opacity: 0;
+    transition: opacity .2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
+.mascota:hover .mascota-cerrar { opacity: 1; }
 .mascota-cerrar:hover { background: #1b2a42; }
 
 @media (max-width: 768px) {
-    .mascota { left: 10px; bottom: 14px; }
-    .mascota-figura { width: 74px; }
-    .mascota-globo { font-size: .74rem; max-width: 60vw; padding: 8px 11px; }
+    .mascota { width: 76px; }
+    .mascota-globo { font-size: .74rem; max-width: 56vw; padding: 8px 11px; }
+    .mascota-cerrar { opacity: 1; }
 }

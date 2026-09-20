@@ -33,7 +33,7 @@
     <meta name="twitter:description" content="Páginas web para negocios de Lima, con botón de WhatsApp y listas para Google. Entrega en 2 a 7 días. Desde S/300.">
     <meta name="twitter:image" content="https://lunaro404.com/og-image.png">
 
-    <link rel="stylesheet" href="style.css?v=202609200215">
+    <link rel="stylesheet" href="style.css?v=202609200255">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 
     <!-- Datos estructurados para Google (negocio local + FAQ) -->
@@ -182,12 +182,8 @@
 <body>
     <nav class="navbar">
         <div class="nav-left">
-            <button type="button" id="btnTema" class="tema-btn" aria-label="Cambiar entre modo oscuro y claro" title="Modo oscuro / claro">
-                <svg class="ico-luna" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                <svg class="ico-sol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.2M12 19.8V22M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2 12h2.2M19.8 12H22M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg>
-            </button>
             <div class="logo">
-                <img src="assets/astronauta.png" width="289" height="404" class="astro astro-logo" alt="" aria-hidden="true">
+                <span class="astro astro-logo"><img class="astro-cuerpo" src="assets/astronauta-cuerpo.png" width="289" height="404" alt="" aria-hidden="true"><img class="astro-brazo" src="assets/astronauta-brazo.png" width="289" height="404" alt="" aria-hidden="true"></span>
                 <span class="logo-text">LUNA<span class="logo-highlight">RO</span></span>
             </div>
         </div>
@@ -309,7 +305,7 @@
     <section id="planes" class="plans-section">
         <div class="section-header section-header-astro-wrap">
             <div class="section-header-astro">
-                <img src="assets/astronauta.png" width="289" height="404" class="astro astro-planes" alt="" aria-hidden="true">
+                <span class="astro astro-planes"><img class="astro-cuerpo" src="assets/astronauta-cuerpo.png" width="289" height="404" alt="" aria-hidden="true"><img class="astro-brazo" src="assets/astronauta-brazo.png" width="289" height="404" alt="" aria-hidden="true"></span>
                 <h2>Planes y precios</h2>
             </div>
             <p>Precios claros desde el inicio. Todo se entrega en 2 a 7 d&iacute;as, con 50% de adelanto y <strong>1 mes de ediciones incluidas</strong>.</p>
@@ -461,7 +457,7 @@
     </section>
 
     <section id="contacto" class="cta-section">
-        <img src="assets/astronauta.png" width="289" height="404" class="astro astro-cta" alt="Astronauta de LUNARO saludando">
+        <span class="astro astro-cta"><img class="astro-cuerpo" src="assets/astronauta-cuerpo.png" width="289" height="404" alt="Astronauta de LUNARO saludando"><img class="astro-brazo" src="assets/astronauta-brazo.png" width="289" height="404" alt="" aria-hidden="true"></span>
         <h2>&iquest;Empezamos con la tuya?</h2>
         <p>Cu&eacute;ntame qu&eacute; vendes y te digo qu&eacute; plan le va a tu negocio. Sin compromiso, respondo el mismo d&iacute;a.</p>
         <a href="https://wa.me/51935611505" target="_blank" class="cta-btn">
@@ -484,7 +480,7 @@
 
     <footer class="footer">
         <div class="footer-content">
-            <img src="assets/astronauta.png" width="289" height="404" class="astro astro-footer" alt="" aria-hidden="true">
+            <span class="astro astro-footer"><img class="astro-cuerpo" src="assets/astronauta-cuerpo.png" width="289" height="404" alt="" aria-hidden="true"><img class="astro-brazo" src="assets/astronauta-brazo.png" width="289" height="404" alt="" aria-hidden="true"></span>
             <div class="logo">
                 <span class="logo-text">LUNA<span class="logo-highlight">RO</span></span>
             </div>
@@ -518,36 +514,6 @@ document.addEventListener('click', function (e) {
     }
   } catch (err) {}
 }, true);
-</script>
-
-
-<script>
-// ---------------------------------------------------------------
-// Modo oscuro / claro.
-// La web nace en oscuro, que es como esta pensada. El boton guarda
-// la eleccion en el navegador para que al volver siga igual.
-// ---------------------------------------------------------------
-(function () {
-  var CLAVE = 'lunaro-tema';
-  var cuerpo = document.body;
-
-  function aplicar(tema) {
-    cuerpo.classList.toggle('modo-claro', tema === 'claro');
-    var b = document.getElementById('btnTema');
-    if (b) b.setAttribute('aria-pressed', tema === 'claro' ? 'true' : 'false');
-  }
-
-  var guardado = null;
-  try { guardado = localStorage.getItem(CLAVE); } catch (e) {}
-  aplicar(guardado || 'oscuro');
-
-  var boton = document.getElementById('btnTema');
-  if (boton) boton.addEventListener('click', function () {
-    var claro = !cuerpo.classList.contains('modo-claro');
-    aplicar(claro ? 'claro' : 'oscuro');
-    try { localStorage.setItem(CLAVE, claro ? 'claro' : 'oscuro'); } catch (e) {}
-  });
-})();
 </script>
 </body>
 </html>

@@ -105,7 +105,7 @@ function initRoulette() {
         } else if (data.videoUrl) {
             mediaHtml = `
                 <div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 16px; position: relative; background: ${data.bgColor}; cursor: pointer;" onclick="openVideoModal('${data.videoUrl}')">
-                    <video class="cell-video" preload="none" poster="${versionPoster(data.videoUrl)}" src="${versionLigera(data.videoUrl)}" data-original="${data.videoUrl}" onerror="if(this.src!==this.dataset.original){this.src=this.dataset.original;}" style="width: 100%; height: 100%; object-fit: cover;" loop muted playsinline></video>
+                    <video class="cell-video" preload="metadata" poster="${versionPoster(data.videoUrl)}" src="${versionLigera(data.videoUrl)}" data-original="${data.videoUrl}" onerror="if(this.src!==this.dataset.original){this.src=this.dataset.original;}" style="width: 100%; height: 100%; object-fit: cover;" loop muted playsinline></video>
                     <div style="position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.1); transition: background 0.3s;" onmouseover="this.style.background='rgba(0,0,0,0.4)'" onmouseout="this.style.background='rgba(0,0,0,0.1)'">
                         <svg viewBox="0 0 24 24" fill="white" style="width: 50px; height: 50px; opacity: 0.8; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));"><path d="M8 5v14l11-7z"/></svg>
                     </div>
@@ -197,7 +197,13 @@ function initRoulette() {
                 if (video) {
                     if (video.readyState > 0) video.currentTime = 0;
                     const p = video.play();
-                    if (p && p.catch) p.catch(() => {});
+                    // Si el navegador rechaza el play porque el archivo todavia
+                    // no empezo a cargar, se fuerza la carga y se reintenta una
+                    // vez. Sin esto la tarjeta central se quedaba congelada en
+                    // la imagen de portada.
+                    if (p && p.catch) p.catch(() => {
+                        try { video.load(); video.play().catch(() => {}); } catch (e) {}
+                    });
                 }
             } else if (distance === 1) {
                 // Immediate left/right cards (Distorted, dark, desaturated)
@@ -233,10 +239,21 @@ function initRoulette() {
     // Optional: Infinite auto-spin with intervals if the user still wants it spinning by itself
     let autoSpin = setInterval(() => rotateCarousel(1), 4000);
 
-    // Pause auto-spin on hover
-    document.querySelector('.hero-carousel-container').addEventListener('mouseenter', () => clearInterval(autoSpin));
-    document.querySelector('.hero-carousel-container').addEventListener('mouseleave', () => {
+    // Pause auto-spin on hover.
+    // Se escucha tambien en .scene porque las tarjetas sobresalen del
+    // contenedor: al apuntar a una, el puntero ya estaba fuera del area que
+    // pausaba el giro y la tarjeta se movia justo antes del clic.
+    const pausar = () => clearInterval(autoSpin);
+    const reanudar = () => {
+        clearInterval(autoSpin);
         autoSpin = setInterval(() => rotateCarousel(1), 4000);
+    };
+    ['.hero-carousel-container', '.scene', '.carousel-positioner'].forEach(sel => {
+        const el = document.querySelector(sel);
+        if (!el) return;
+        el.addEventListener('mouseenter', pausar);
+        el.addEventListener('mouseover', pausar);
+        el.addEventListener('mouseleave', reanudar);
     });
 
     // Swipe táctil (móvil): mover el carrusel arrastrando con el dedo

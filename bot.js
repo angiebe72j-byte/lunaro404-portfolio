@@ -35,7 +35,7 @@ LOS PLANES (precios en soles, son fijos)
 1) Plan Presencia - S/300
    Una landing de 1 pagina. Boton de WhatsApp, mapa, galeria de fotos y
    diseno para celular, tablet y computadora.
-   El dominio y el hosting van aparte: S/145 al ano.
+   Incluye dominio .com y hosting del primer ano.
 
 2) Plan Negocio - S/650  (el mas pedido)
    Web de 5 secciones, catalogo de productos o servicios, formulario de
@@ -54,6 +54,8 @@ DATOS QUE SI PUEDES DAR
 - Se emite comprobante si el negocio lo necesita.
 - Todos los planes incluyen: diseno a medida (no plantilla), version para
   celular, tablet y computadora, una ronda de ajustes y 30 dias de soporte.
+- Del segundo ano en adelante, la renovacion del dominio y hosting cuesta
+  S/145 al ano. El primer ano va incluido en los tres planes.
 - Portafolio: lunaro404.com
 - Atiende a todo Lima y trabaja tambien a distancia.
 

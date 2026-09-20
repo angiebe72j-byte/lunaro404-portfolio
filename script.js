@@ -239,22 +239,38 @@ function initRoulette() {
     // Optional: Infinite auto-spin with intervals if the user still wants it spinning by itself
     let autoSpin = setInterval(() => rotateCarousel(1), 4000);
 
-    // Pause auto-spin on hover.
-    // Se escucha tambien en .scene porque las tarjetas sobresalen del
-    // contenedor: al apuntar a una, el puntero ya estaba fuera del area que
-    // pausaba el giro y la tarjeta se movia justo antes del clic.
-    const pausar = () => clearInterval(autoSpin);
-    const reanudar = () => {
+    // El giro automatico era el motivo real por el que no se podia abrir un
+    // video: entre que el visitante veia la tarjeta y alcanzaba a hacer clic,
+    // el carrusel ya habia girado y el clic caia en otro lado (o en nada).
+    //
+    // Ahora basta con mover el mouse sobre la zona del carrusel para que se
+    // detenga, y solo vuelve a girar un rato despues de que el puntero se va.
+    let reanudarTimer = null;
+
+    function pausarGiro() {
         clearInterval(autoSpin);
-        autoSpin = setInterval(() => rotateCarousel(1), 4000);
-    };
-    ['.hero-carousel-container', '.scene', '.carousel-positioner'].forEach(sel => {
-        const el = document.querySelector(sel);
-        if (!el) return;
-        el.addEventListener('mouseenter', pausar);
-        el.addEventListener('mouseover', pausar);
-        el.addEventListener('mouseleave', reanudar);
-    });
+        autoSpin = null;
+        clearTimeout(reanudarTimer);
+    }
+
+    function reanudarGiro(demora = 2500) {
+        clearTimeout(reanudarTimer);
+        reanudarTimer = setTimeout(() => {
+            clearInterval(autoSpin);
+            autoSpin = setInterval(() => rotateCarousel(1), 4000);
+        }, demora);
+    }
+
+    const zona = document.querySelector('.hero-carousel-container');
+    if (zona) {
+        // mousemove y no solo mouseenter: las tarjetas giradas sobresalen del
+        // contenedor y el puntero entraba sin disparar mouseenter.
+        zona.addEventListener('mousemove', pausarGiro);
+        zona.addEventListener('mouseleave', () => reanudarGiro());
+        // Tras hacer clic en un video, no tiene sentido seguir girando detras
+        // del modal: se da mas margen.
+        zona.addEventListener('click', () => { pausarGiro(); reanudarGiro(8000); });
+    }
 
     // Swipe táctil (móvil): mover el carrusel arrastrando con el dedo
     let touchStartX = 0;

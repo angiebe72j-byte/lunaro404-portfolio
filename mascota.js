@@ -65,6 +65,8 @@
     var plataforma = null;
 
     var aplaste = 0, pasoReloj = 0;
+    var ocioso = 0;      // segundos sin nada que hacer
+    var deslizando = 0;  // segundos que le quedan de deslizada
     var giro = 0, giroVel = 0, rodando = 0;   // volteretas y rodada de ninja
 
     // ----------------------------------------------------------------
@@ -172,6 +174,17 @@
                 tronco: -2, cab: -4
             });
             alturaMeta = 0;
+        },
+
+        // Deslizada: una pierna estirada adelante, el cuerpo echado
+        // atras y el brazo buscando el piso. La frenada del ninja.
+        desliza: function () {
+            poner({
+                pD: -74, pDi: 8, pT: -18, pTi: 86,
+                bD: 74, bDi: 22, bT: -58, bTi: 40,
+                tronco: 16, cab: -14
+            });
+            alturaMeta = 34;
         },
 
         // Hecho un ovillo: para la voltereta y la rodada.
@@ -321,6 +334,33 @@
         });
     }
 
+    // Carrerita y frenada deslizando.
+    function deslizada() {
+        var lejos = (x < window.innerWidth / 2)
+            ? window.innerWidth - an * 1.2 : an * 0.2;
+        irA(lejos, true, function () { esperar(0.35, decidir); });
+        // Suelta el freno a mitad de camino y termina patinando.
+        setTimeout(function () {
+            if (accion === 'corre') {
+                destino = null; alLlegar = null; accion = 'quieto';
+                deslizando = 0.75;
+                esperar(0.95, decidir);
+            }
+        }, 520);
+    }
+
+    // Llega hasta la pared y rebota de espaldas, girando.
+    function rebotePared() {
+        var pared = (x < window.innerWidth / 2) ? 2 : window.innerWidth - an - 2;
+        irA(pared, true, function () {
+            mira = -mira;
+            vx = (pared < 10 ? 1 : -1) * 260;
+            saltar(1050);
+            giroVel = 700 * (pared < 10 ? 1 : -1);
+            esperar(0.9, function () { giroVel = 0; esperar(0.2, decidir); });
+        });
+    }
+
     // Voltereta: salta y gira entero en el aire.
     function voltereta() {
         if (!enSuelo) { decidir(); return; }
@@ -333,17 +373,25 @@
         var dado = Math.random();
         var sitio = mundo.length ? alAzar(mundo) : null;
 
-        if (dado < 0.1) {
+        if (dado < 0.08) {
             // Sacar el cartel y mandar a escribirle a Gian.
             sacarCartel();
 
-        } else if (dado < 0.24) {
+        } else if (dado < 0.19) {
+            // Carrerita y frenada patinando.
+            deslizada();
+
+        } else if (dado < 0.29) {
+            // Rebotar contra el borde de la pantalla.
+            rebotePared();
+
+        } else if (dado < 0.4) {
             // Voltereta, a veces con carrerita antes.
             if (Math.random() < 0.5) {
                 irA(Math.random() * (window.innerWidth - an), true, voltereta);
             } else voltereta();
 
-        } else if (sitio && dado < 0.36) {
+        } else if (sitio && dado < 0.52) {
             // Treparse encima de una tarjeta y caminar por el borde.
             var entrada = (x < sitio.x1) ? sitio.x1 + 20 : sitio.x2 - an - 20;
             irA(entrada, true, function () {
@@ -357,11 +405,11 @@
                 });
             });
 
-        } else if (sitio && dado < 0.74) {
+        } else if (sitio && dado < 0.82) {
             // Meterse detras de una tarjeta y asomar el casco.
             esconderseTras(sitio);
 
-        } else if (dado < 0.92) {
+        } else if (dado < 0.94) {
             // Cruzar corriendo de lado a lado.
             var lejos = (x < window.innerWidth / 2) ? window.innerWidth - an * 1.3 : an * 0.3;
             irA(lejos, true, function () {
@@ -390,7 +438,7 @@
                     escondite = null;
                     gesto = null;
                     saltar(1100);
-                    esperar(0.5, decidir);
+                    esperar(0.3, decidir);
                 });
             });
         });
@@ -413,30 +461,41 @@
     }
 
     window.addEventListener('scroll', function () {
-        // Mientras la pagina baja, el no se esconde: sigue ahi, saltando
-        // de escalon en escalon. Solo suelta lo que estaba haciendo.
-        escondite = null;
-        if (gesto === 'espia' || gesto === 'cartel') gesto = null;
-        mascota.classList.remove('cartel');
-        destino = null;
-        alLlegar = null;
+        // Antes el scroll le borraba la orden que tenia, y como al bajar
+        // el evento se dispara sin parar, se quedaba sin nada que hacer:
+        // por eso solo se movia cuando uno soltaba la rueda. Ahora sigue
+        // con lo suyo mientras la pagina baja, y solo se le sueltan las
+        // dos cosas que lo dejarian clavado en un sitio que ya se movio:
+        // estar escondido detras de algo y estar sosteniendo el cartel.
+        if (escondite || gesto === 'espia' || gesto === 'cartel') {
+            escondite = null;
+            gesto = null;
+            mascota.classList.remove('cartel');
+            hastaCuando = 0;
+            alLlegar = null;
+            decidir();
+        }
 
         clearTimeout(tQuieto);
-        tQuieto = setTimeout(function () {
-            var paso = seccionActual();
-            if (paso && !dichas[paso.id]) {
-                dichas[paso.id] = true;
-                var el = document.getElementById(paso.id);
-                var r = el.getBoundingClientRect();
-                var meta2 = Math.max(16, Math.min(window.innerWidth - an - 16, r.left + r.width * 0.3));
-                irA(meta2, true, function () {
-                    gesto = 'senala';
-                    decir(paso.texto, 4400);
-                    esperar(3.4, decidir);
-                });
-            } else decidir();
-        }, 260);
+        tQuieto = setTimeout(mirarSeccion, 240);
     }, { passive: true });
+
+    // Al frenar, si la seccion es nueva va y la senala. Si ya la conocia,
+    // no interrumpe: lo deja seguir jugando.
+    function mirarSeccion() {
+        var paso = seccionActual();
+        if (!paso || dichas[paso.id]) return;
+        dichas[paso.id] = true;
+
+        var el = document.getElementById(paso.id);
+        var r = el.getBoundingClientRect();
+        var meta2 = Math.max(16, Math.min(window.innerWidth - an - 16, r.left + r.width * 0.3));
+        irA(meta2, true, function () {
+            gesto = 'senala';
+            decir(paso.texto, 3400);
+            esperar(2.6, decidir);
+        });
+    }
 
     var tabla = document.getElementById('cartel');
     if (tabla) tabla.addEventListener('click', function (e) {
@@ -490,6 +549,15 @@
         } else if (hastaCuando && ahora > hastaCuando) {
             hastaCuando = 0;
             var g = alLlegar; alLlegar = null; if (g) g();
+        }
+
+        // Si esta parado, sin destino y sin nada pendiente, se le ocurre
+        // algo enseguida. Sin esto cualquier orden perdida lo congelaba.
+        if (accion !== 'camina' && accion !== 'corre' && !hastaCuando && !alLlegar && !escondite) {
+            ocioso += dt;
+            if (ocioso > 0.2) { ocioso = 0; decidir(); }
+        } else {
+            ocioso = 0;
         }
 
         vx += (objetivo - vx) * Math.min(1, dt * 9);
@@ -548,6 +616,11 @@
         }
         aplaste += (0 - aplaste) * Math.min(1, dt * 7);
 
+        if (deslizando > 0) {
+            deslizando -= dt;
+            vx *= (1 - Math.min(1, dt * 2.1));   // va frenando, como quien patina
+        }
+
         // Volteretas y rodada: el giro se integra igual que la fisica.
         if (rodando > 0) {
             rodando -= dt;
@@ -559,7 +632,8 @@
 
         // --- que pose toca ---
         var rapidez = Math.abs(vx);
-        if (rodando > 0 || Math.abs(giroVel) > 1) pose = 'rueda';
+        if (deslizando > 0) pose = 'desliza';
+        else if (rodando > 0 || Math.abs(giroVel) > 1) pose = 'rueda';
         else if (gesto === 'espia') pose = 'espia';
         else if (gesto === 'cartel' && enSuelo) pose = 'cartel';
         else if (!enSuelo) pose = (gesto === 'festeja') ? 'festeja' : (vy < 0 ? 'sube' : 'cae');
@@ -567,6 +641,11 @@
         else if (rapidez > 12) pose = 'camina';
         else if (gesto) pose = gesto;
         else pose = 'quieto';
+
+        // Queda a la vista en el HTML que esta haciendo: sirve para
+        // revisarlo desde fuera sin tener que tocar el codigo.
+        mascota.dataset.pose = pose;
+        mascota.dataset.accion = accion + (escondite ? '+escondido' : '') + (hastaCuando ? '+esperando' : '');
 
         if (enSuelo && rapidez > 12) pasoReloj += dt * (3.2 + rapidez / 32);
         POSE[pose](t);

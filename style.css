@@ -1608,54 +1608,93 @@ img.tech-logo:hover {
 
 /* ============================================================
    EL ASTRONAUTA QUE VIVE EN LA PAGINA
-   Aqui casi no hay animaciones: el movimiento lo calcula mascota.js
-   cuadro a cuadro (gravedad, impulso, rebote). El CSS solo pone la
-   estructura y deja listas las capas para que el navegador las mueva
-   en la tarjeta de video.
+   Esta dibujado en vectores y partido en piezas con bisagras, porque
+   una imagen plana solo sabe hacer un movimiento. Aqui van los colores
+   (calcados del personaje de la marca) y la estructura; los angulos de
+   brazos y piernas los calcula mascota.js cuadro a cuadro.
    ============================================================ */
 .mascota {
     position: fixed;
     left: 0;
     top: 0;
     z-index: 90;
-    width: 112px;
+    width: 104px;
     will-change: transform;
     pointer-events: none;
 }
 
-.mascota-figura {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 289 / 404;
-    transform-origin: 50% 100%;   /* los pies: es desde donde se impulsa */
-    cursor: pointer;
-    pointer-events: auto;
-    filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .45));
-    will-change: transform;
-}
-
-.mascota-figura img {
-    position: absolute;
-    inset: 0;
+.mascota-svg {
+    display: block;
     width: 100%;
     height: auto;
-    display: block;
+    overflow: visible;
+    cursor: pointer;
+    pointer-events: auto;
+    filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .45));
+}
+
+/* El trazo grueso y parejo es lo que le da el aire de dibujo animado. */
+.mascota-svg g > *,
+.mascota-svg rect,
+.mascota-svg circle,
+.mascota-svg path {
+    fill: #ffffff;
+    stroke: #16203c;
+    stroke-width: 4;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+/* Las piezas del fondo van mas apagadas: asi se lee cual brazo y cual
+   pierna estan adelante cuando corre. */
+.mascota-svg .atras rect,
+.mascota-svg .atras circle { fill: #ccd8ea; }
+
+.mascota-svg .mochila   { fill: #b9c8de; }
+.mascota-svg .panel     { fill: #eef3fa; }
+.mascota-svg .boton     { fill: #2f6fd0; }
+.mascota-svg .tecla     { fill: #8fa3bd; }
+.mascota-svg .banda     { fill: #1e3a6d; stroke: none; }
+.mascota-svg .atras .banda { fill: #17305c; }
+.mascota-svg .visor     { fill: #0b1226; }
+.mascota-svg .manguera  { fill: none; stroke-width: 5; }
+.mascota-svg .brillo    { fill: none; stroke: #ffffff; stroke-width: 5; opacity: .9; }
+
+/* El cartel que saca de vez en cuando. Arranca escondido y encogido:
+   al aparecer da el golpe de "sacarlo", no aparece de la nada. */
+#cartel {
+    opacity: 0;
+    transform: scale(.2) rotate(-25deg);
+    transform-origin: 0 26px;
+    transition: opacity .18s ease, transform .4s cubic-bezier(.3,1.6,.5,1);
     pointer-events: none;
 }
 
-.mascota-figura .astro-brazo {
-    transform-origin: 32.9% 47%;
-    will-change: transform;
+.mascota.cartel #cartel {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+    pointer-events: auto;
+    cursor: pointer;
 }
 
-/* La sombra en el piso. Va fuera de la figura a proposito: cuando el
-   astronauta salta, la sombra se queda abajo y solo se achica. Eso es
-   lo que hace que se lea la altura del salto. */
+.mascota-svg .palo  { fill: #cbd6e6; }
+.mascota-svg .tabla { fill: #ffffff; }
+.mascota-svg .letra {
+    fill: #16203c;
+    stroke: none;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 19px;
+    font-weight: 800;
+    text-anchor: middle;
+}
+
+/* La sombra se queda en el piso y solo se achica: eso es lo que hace
+   que se lea la altura del salto. */
 .mascota-sombra {
     position: absolute;
     left: 50%;
-    bottom: -4px;
-    width: 58%;
+    bottom: 2px;
+    width: 56%;
     height: 11px;
     border-radius: 50%;
     background: rgba(0, 0, 0, .5);
@@ -1670,7 +1709,7 @@ img.tech-logo:hover {
     position: absolute;
     bottom: 100%;
     left: 50%;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
     transform: translateX(-50%) translateY(8px) scale(.9);
     transform-origin: 50% 100%;
     width: max-content;
@@ -1687,6 +1726,7 @@ img.tech-logo:hover {
     opacity: 0;
     transition: opacity .25s ease, transform .35s cubic-bezier(.34,1.5,.64,1);
     pointer-events: none;
+    z-index: 2;
 }
 
 .mascota.habla .mascota-globo {
@@ -1710,8 +1750,8 @@ img.tech-logo:hover {
 /* ---------- La cruz para apagarlo ---------- */
 .mascota-cerrar {
     position: absolute;
-    top: -4px;
-    right: -8px;
+    top: 0;
+    right: -10px;
     width: 22px;
     height: 22px;
     border-radius: 50%;
@@ -1734,7 +1774,7 @@ img.tech-logo:hover {
 .mascota-cerrar:hover { background: #1b2a42; }
 
 @media (max-width: 768px) {
-    .mascota { width: 76px; }
+    .mascota { width: 72px; }
     .mascota-globo { font-size: .74rem; max-width: 56vw; padding: 8px 11px; }
     .mascota-cerrar { opacity: 1; }
 }

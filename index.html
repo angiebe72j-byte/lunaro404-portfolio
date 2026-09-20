@@ -33,7 +33,7 @@
     <meta name="twitter:description" content="Páginas web para negocios de Lima, con botón de WhatsApp y listas para Google. Entrega en 2 a 7 días. Desde S/300.">
     <meta name="twitter:image" content="https://lunaro404.com/og-image.png">
 
-    <link rel="stylesheet" href="style.css?v=202609200345">
+    <link rel="stylesheet" href="style.css?v=202609200630">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 
     <!-- Datos estructurados para Google (negocio local + FAQ) -->
@@ -499,19 +499,86 @@
         </div>
     </footer>
 
-    <!-- El astronauta que vive en la pagina: lo mueve mascota.js -->
+    <!-- El astronauta articulado. Cada parte es un grupo con su bisagra;
+         mascota.js le mueve los angulos cuadro a cuadro. Los segmentos
+         empiezan por encima de su bisagra a proposito: ese solape es lo
+         que evita que se vea la juntura cuando dobla. -->
     <div class="mascota" id="mascota">
         <div class="mascota-globo"></div>
-        <div class="mascota-figura">
-            <img class="astro-cuerpo" src="assets/astronauta-cuerpo.png" width="289" height="404" alt="" aria-hidden="true">
-            <img class="astro-brazo" src="assets/astronauta-brazo.png" width="289" height="404" alt="" aria-hidden="true">
-        </div>
+        <svg class="mascota-svg" viewBox="-80 -208 160 218" aria-hidden="true">
+            <g id="astroEscala">
+                <g id="astroCuerpo">
+
+                    <!-- Brazo y pierna del fondo, mas apagados: dan profundidad -->
+                    <g id="bT" class="atras">
+                        <rect x="-11" y="-12" width="22" height="38" rx="11"/>
+                        <g id="bTi">
+                            <rect x="-10" y="-11" width="20" height="33" rx="10"/>
+                            <rect x="-10" y="12" width="20" height="7" class="banda"/>
+                            <circle cx="0" cy="26" r="13"/>
+                        </g>
+                    </g>
+                    <g id="pT" class="atras">
+                        <rect x="-13" y="-14" width="26" height="42" rx="13"/>
+                        <g id="pTi">
+                            <rect x="-12" y="-13" width="24" height="35" rx="12"/>
+                            <rect x="-12" y="10" width="24" height="7" class="banda"/>
+                            <path d="M-13 16 h26 v12 q0 9 -9 9 h-22 q-7 0 -7 -7 q0 -14 12 -14 z"/>
+                        </g>
+                    </g>
+
+                    <!-- Mochila, torso y casco -->
+                    <g id="tronco">
+                        <rect x="-31" y="-128" width="62" height="60" rx="21" class="mochila"/>
+                        <rect x="-35" y="-132" width="70" height="70" rx="27"/>
+                        <rect x="-21" y="-118" width="42" height="30" rx="9" class="panel"/>
+                        <rect x="-15" y="-112" width="16" height="16" rx="4" class="boton"/>
+                        <rect x="4" y="-112" width="12" height="6" rx="2" class="tecla"/>
+                        <rect x="4" y="-102" width="12" height="6" rx="2" class="tecla"/>
+                        <path d="M-35 -104 q-13 8 -10 22" class="manguera"/>
+                        <path d="M35 -104 q13 8 10 22" class="manguera"/>
+                        <rect x="-35" y="-76" width="70" height="9" class="banda"/>
+                        <g id="cab">
+                            <rect x="33" y="-46" width="13" height="24" rx="6"/>
+                            <circle cx="0" cy="-34" r="38"/>
+                            <circle cx="2" cy="-36" r="27" class="visor"/>
+                            <path d="M-14 -50 a19 19 0 0 1 15 -9" class="brillo"/>
+                        </g>
+                    </g>
+
+                    <!-- Brazo y pierna del frente -->
+                    <g id="pD">
+                        <rect x="-13" y="-14" width="26" height="42" rx="13"/>
+                        <g id="pDi">
+                            <rect x="-12" y="-13" width="24" height="35" rx="12"/>
+                            <rect x="-12" y="10" width="24" height="7" class="banda"/>
+                            <path d="M-13 16 h26 v12 q0 9 -9 9 h-22 q-7 0 -7 -7 q0 -14 12 -14 z"/>
+                        </g>
+                    </g>
+                    <g id="bD">
+                        <rect x="-11" y="-12" width="22" height="38" rx="11"/>
+                        <g id="bDi">
+                            <rect x="-10" y="-11" width="20" height="33" rx="10"/>
+                            <rect x="-10" y="12" width="20" height="7" class="banda"/>
+                            <circle cx="0" cy="26" r="13"/>
+                            <g id="cartelGiro"><g id="cartel">
+                                <rect x="-4" y="-18" width="8" height="46" rx="4" class="palo"/>
+                                <rect x="-62" y="-64" width="124" height="50" rx="10" class="tabla"/>
+                                <text x="0" y="-43" class="letra">Escr&#237;bele a</text>
+                                <text x="0" y="-24" class="letra">mi creador</text>
+                            </g></g>
+                        </g>
+                    </g>
+
+                </g>
+            </g>
+        </svg>
         <div class="mascota-sombra"></div>
         <button type="button" class="mascota-cerrar" aria-label="Ocultar al astronauta">&times;</button>
     </div>
 
     <script src="script.js?v=202609070055"></script>
-    <script src="mascota.js?v=202609200345" defer></script>
+    <script src="mascota.js?v=202609200630" defer></script>
 <script>
 // Avisa al servidor cuando alguien toca un boton de WhatsApp
 document.addEventListener('click', function (e) {

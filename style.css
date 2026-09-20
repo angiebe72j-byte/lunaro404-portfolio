@@ -1683,3 +1683,71 @@ body.modo-claro .about-stat span { color: rgba(16, 21, 31, 0.6); }
 
 /* El logo de AWS venía forzado a blanco con estilo en línea */
 body.modo-claro .tech-logo[alt="AWS"] { filter: none !important; }
+
+/* ============================================================
+   ASTRONAUTA LUNARO
+   El SVG trae adentro su propia animacion (el saludo, los pasos,
+   la llama del jetpack). Aqui solo se le da el tamano y el flote,
+   que es el movimiento suave de arriba a abajo.
+   ============================================================ */
+.astro {
+    display: block;
+    user-select: none;
+    pointer-events: none;
+    animation: astro-flota 5s ease-in-out infinite;
+    filter: drop-shadow(0 10px 22px rgba(77, 166, 255, .35));
+}
+
+@keyframes astro-flota {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50%      { transform: translateY(-16px) rotate(2deg); }
+}
+
+/* Mini astronauta al lado del logo del menu. */
+.astro-logo {
+    width: 30px;
+    height: 30px;
+    margin-right: 6px;
+    animation-duration: 4s;
+    filter: none;
+}
+
+/* El grande de la seccion de contacto. */
+.astro-cta {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 14px;
+}
+
+/* El que "corre" en la cabecera de planes, al costado del titulo. */
+.section-header-astro {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+}
+.astro-planes {
+    width: 74px;
+    height: 74px;
+    flex-shrink: 0;
+    animation-duration: 4.2s;
+}
+
+/* El chiquito del pie de pagina. */
+.astro-footer {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 10px;
+    opacity: .9;
+}
+
+@media (max-width: 768px) {
+    .astro-cta { width: 110px; height: 110px; }
+    .astro-planes { width: 54px; height: 54px; }
+    .astro-logo { width: 26px; height: 26px; }
+}
+
+/* Si la persona pidio en su sistema menos animaciones, se queda quieto. */
+@media (prefers-reduced-motion: reduce) {
+    .astro { animation: none; }
+}

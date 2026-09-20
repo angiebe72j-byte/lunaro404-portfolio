@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 250" role="img" aria-label="Astronauta de LUNARO volando con jetpack">
+  <defs>
+    <linearGradient id="visor2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1b3b63"/>
+      <stop offset="55%" stop-color="#0a1626"/>
+      <stop offset="100%" stop-color="#4da6ff"/>
+    </linearGradient>
+    <linearGradient id="traje2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#cbd9ec"/>
+    </linearGradient>
+    <linearGradient id="fuego" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7bd4ff"/>
+      <stop offset="60%" stop-color="#4da6ff"/>
+      <stop offset="100%" stop-color="#4da6ff" stop-opacity="0"/>
+    </linearGradient>
+    <style>
+      /* Las piernas van alternadas, como si estuviera corriendo en el aire. */
+      .pierna-a { transform-origin: 90px 178px; animation: pasoA 0.9s ease-in-out infinite; }
+      .pierna-b { transform-origin: 111px 178px; animation: pasoB 0.9s ease-in-out infinite; }
+      @keyframes pasoA { 0%,100% { transform: rotate(16deg) } 50% { transform: rotate(-14deg) } }
+      @keyframes pasoB { 0%,100% { transform: rotate(-14deg) } 50% { transform: rotate(16deg) } }
+      .brazo-a { transform-origin: 66px 122px; animation: pasoB 0.9s ease-in-out infinite; }
+      /* La llama del jetpack titila para dar sensacion de empuje. */
+      .llama { transform-origin: 100px 184px; animation: fuego 0.25s ease-in-out infinite alternate; }
+      @keyframes fuego { from { transform: scaleY(.75); opacity:.7 } to { transform: scaleY(1.15); opacity:1 } }
+      @media (prefers-reduced-motion: reduce) {
+        .pierna-a, .pierna-b, .brazo-a, .llama { animation: none; }
+      }
+    </style>
+  </defs>
+
+  <!-- llama del jetpack -->
+  <g class="llama">
+    <path d="M86 180c6 22 12 34 14 46 2-12 8-24 14-46z" fill="url(#fuego)"/>
+  </g>
+
+  <rect x="62" y="112" width="76" height="72" rx="20" fill="#9fb4cf"/>
+
+  <g class="pierna-a">
+    <path d="M83 172h14v42a7 7 0 0 1-14 0z" fill="url(#traje2)" stroke="#8fa5c0" stroke-width="3"/>
+    <rect x="77" y="208" width="26" height="16" rx="8" fill="#4da6ff"/>
+  </g>
+  <g class="pierna-b">
+    <path d="M104 172h14v42a7 7 0 0 1-14 0z" fill="url(#traje2)" stroke="#8fa5c0" stroke-width="3"/>
+    <rect x="98" y="208" width="26" height="16" rx="8" fill="#4da6ff"/>
+  </g>
+
+  <g class="brazo-a">
+    <path d="M66 122c-14 2-20 14-20 28" fill="none" stroke="url(#traje2)" stroke-width="19" stroke-linecap="round"/>
+    <circle cx="46" cy="152" r="11" fill="#fff" stroke="#8fa5c0" stroke-width="3"/>
+  </g>
+
+  <rect x="62" y="108" width="76" height="76" rx="26" fill="url(#traje2)" stroke="#8fa5c0" stroke-width="3"/>
+  <rect x="84" y="132" width="32" height="24" rx="7" fill="#0f1d30"/>
+  <circle cx="93" cy="144" r="3.5" fill="#4da6ff"/>
+  <circle cx="107" cy="144" r="3.5" fill="#7bd4ff"/>
+
+  <path d="M136 122c16 2 24 12 26 26" fill="none" stroke="url(#traje2)" stroke-width="19" stroke-linecap="round"/>
+  <circle cx="163" cy="152" r="11" fill="#fff" stroke="#8fa5c0" stroke-width="3"/>
+
+  <circle cx="100" cy="66" r="48" fill="url(#traje2)" stroke="#8fa5c0" stroke-width="3"/>
+  <circle cx="100" cy="66" r="36" fill="url(#visor2)"/>
+  <path d="M78 52c6-8 16-12 26-11" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity=".55"/>
+</svg>

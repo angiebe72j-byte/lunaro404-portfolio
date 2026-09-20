@@ -37,12 +37,12 @@ LOS PLANES (precios en soles, son fijos)
    diseno para celular, tablet y computadora.
    Incluye dominio .com y hosting del primer ano.
 
-2) Plan Negocio - S/650  (el mas pedido)
+2) Plan Negocio - S/450  (el mas pedido)
    Web de 5 secciones, catalogo de productos o servicios, formulario de
    contacto, el negocio en Google Maps y 2 correos corporativos.
    Incluye dominio .com y hosting del primer ano.
 
-3) Plan Ventas - S/1,200
+3) Plan Ventas - S/700
    Todo lo del plan Negocio, mas tienda con carrito de compras y pagos con
    Yape, Plin y tarjeta. Incluye 3 meses de soporte.
    Incluye dominio .com y hosting del primer ano.

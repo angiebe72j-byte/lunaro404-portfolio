@@ -195,11 +195,17 @@ body {
     margin-bottom: 40px; /* space for dots */
 }
 
+/* Los dos contenedores del carrusel son cajas vacias que ocupan toda el area.
+   En 3D, segun el angulo de giro, quedaban por delante de la tarjeta central y
+   se comian el clic: el puntero ni siquiera cambiaba a manito y el video no
+   abria (le pasaba, por ejemplo, a Kensho). Se les quita la captura de clics y
+   se la devolvemos solo a las tarjetas. */
 .carousel-positioner {
     width: 100%;
     height: 100%;
     position: absolute;
     transform-style: preserve-3d;
+    pointer-events: none;
 }
 
 .carousel-3d {
@@ -208,6 +214,7 @@ body {
     position: absolute;
     transform-style: preserve-3d;
     transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
 }
 
 /* Nav Arrows */
@@ -266,6 +273,7 @@ body {
     flex-direction: column;
     padding: 20px;
     backface-visibility: hidden;
+    pointer-events: auto; /* los contenedores no capturan clics; las tarjetas si */
     transition: filter 1.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 1.2s cubic-bezier(0.22, 1, 0.36, 1);
     /* bgColor is set via JS */
 }

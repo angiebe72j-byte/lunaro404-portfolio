@@ -261,6 +261,27 @@ function initRoulette() {
         }, demora);
     }
 
+    // Red de seguridad: en el carrusel 3D, segun el angulo, el clic puede caer
+    // en un hueco entre tarjetas y no pasar nada (le ocurria a Kensho: ni
+    // siquiera aparecia la manito). Si el clic cae dentro de la zona central y
+    // no lo atendio ninguna tarjeta, se abre el video de la tarjeta del frente.
+    const escena = document.querySelector('.scene');
+    if (escena) {
+        escena.addEventListener('click', (e) => {
+            if (e.target.closest('.carousel__cell')) return; // ya lo atendio la tarjeta
+            if (e.target.closest('.nav-btn')) return;        // flechas de navegar
+
+            const caja = escena.getBoundingClientRect();
+            const dentroDelCentro = Math.abs(e.clientX - (caja.left + caja.width / 2)) < caja.width * 0.3;
+            if (!dentroDelCentro) return;
+
+            const activa = document.querySelector('.carousel__cell.is-active');
+            const boton = activa && activa.querySelector('[onclick*="openVideoModal"]');
+            if (boton) boton.click();
+        });
+        escena.style.cursor = 'pointer';
+    }
+
     const zona = document.querySelector('.hero-carousel-container');
     if (zona) {
         // mousemove y no solo mouseenter: las tarjetas giradas sobresalen del

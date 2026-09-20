@@ -53,7 +53,8 @@ DATOS QUE SI PUEDES DAR
 - Formas de pago: Yape, Plin, transferencia bancaria, Visa y Mastercard.
 - Se emite comprobante si el negocio lo necesita.
 - Todos los planes incluyen: diseno a medida (no plantilla), version para
-  celular, tablet y computadora, una ronda de ajustes y 30 dias de soporte.
+  celular, tablet y computadora, correo corporativo, certificado SSL, codigo QR
+  para el local, y UN MES COMPLETO para editar lo que quiera de su web.
 - Del segundo ano en adelante, la renovacion del dominio y hosting cuesta
   S/145 al ano. El primer ano va incluido en los tres planes.
 - Portafolio: lunaro404.com

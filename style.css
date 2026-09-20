@@ -1522,91 +1522,6 @@ img.tech-logo:hover {
 }
 
 /* ============================================================
-   ASTRONAUTA LUNARO
-   El personaje esta partido en dos imagenes: el cuerpo y el brazo que
-   saluda. El brazo se recorto a la altura del hombro y gira sobre ese
-   punto (transform-origin), que es lo que hace el saludo de verdad.
-   El cuerpo conserva un muñon en el hombro para tapar la union.
-   ============================================================ */
-.astro {
-    position: relative;
-    display: block;
-    aspect-ratio: 289 / 404;
-    user-select: none;
-    pointer-events: none;
-    animation: astro-flota 4s ease-in-out infinite;
-    filter: drop-shadow(0 12px 18px rgba(0, 0, 0, .35));
-}
-
-.astro img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: auto;
-    display: block;
-}
-
-/* El saludo: el brazo va y viene desde el hombro. */
-.astro-brazo {
-    transform-origin: 32.9% 47%;
-    animation: astro-saluda 1.1s ease-in-out infinite;
-}
-
-@keyframes astro-saluda {
-    0%, 100% { transform: rotate(2deg); }
-    50%      { transform: rotate(-17deg); }
-}
-
-@keyframes astro-flota {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-10px); }
-}
-
-/* Mini astronauta al lado del logo del menu. */
-.astro-logo {
-    width: 26px;
-    margin-right: 8px;
-    filter: none;
-}
-
-/* El grande de la seccion de contacto. */
-.astro-cta {
-    width: 130px;
-    margin: 0 auto 18px;
-}
-
-/* El de la cabecera de planes, al costado del titulo. */
-.section-header-astro {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-}
-.astro-planes {
-    width: 62px;
-    flex-shrink: 0;
-}
-
-/* El chiquito del pie de pagina. */
-.astro-footer {
-    width: 56px;
-    margin: 0 auto 12px;
-    opacity: .95;
-}
-
-@media (max-width: 768px) {
-    .astro-cta { width: 100px; }
-    .astro-planes { width: 46px; }
-    .astro-logo { width: 22px; }
-    .astro-footer { width: 46px; }
-}
-
-/* Si la persona pidio en su sistema menos animaciones, se queda quieto. */
-@media (prefers-reduced-motion: reduce) {
-    .astro, .astro-brazo { animation: none; }
-}
-
-/* ============================================================
    EL ASTRONAUTA QUE VIVE EN LA PAGINA
    Esta dibujado en vectores y partido en piezas con bisagras, porque
    una imagen plana solo sabe hacer un movimiento. Aqui van los colores
@@ -1747,34 +1662,7 @@ img.tech-logo:hover {
     border-radius: 2px;
 }
 
-/* ---------- La cruz para apagarlo ---------- */
-.mascota-cerrar {
-    position: absolute;
-    top: 0;
-    right: -10px;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, .25);
-    background: rgba(10, 16, 28, .9);
-    color: #fff;
-    font-size: 15px;
-    line-height: 1;
-    cursor: pointer;
-    padding: 0;
-    pointer-events: auto;
-    opacity: 0;
-    transition: opacity .2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.mascota:hover .mascota-cerrar { opacity: 1; }
-.mascota-cerrar:hover { background: #1b2a42; }
-
 @media (max-width: 768px) {
     .mascota { width: 72px; }
     .mascota-globo { font-size: .74rem; max-width: 56vw; padding: 8px 11px; }
-    .mascota-cerrar { opacity: 1; }
 }

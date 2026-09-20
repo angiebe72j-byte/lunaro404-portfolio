@@ -29,13 +29,6 @@
     var svg    = mascota.querySelector('.mascota-svg');
     var globo  = mascota.querySelector('.mascota-globo');
     var sombra = mascota.querySelector('.mascota-sombra');
-    var cerrar = mascota.querySelector('.mascota-cerrar');
-    var APAGADA = 'lunaro-mascota-off';
-
-    try {
-        if (localStorage.getItem(APAGADA) === '1') { mascota.remove(); return; }
-    } catch (e) {}
-
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         mascota.remove();
         return;
@@ -321,10 +314,10 @@
         gesto = 'cartel';
         mira = 1;
         mascota.classList.add('cartel');
-        esperar(4.2, function () {
+        esperar(3.2, function () {
             mascota.classList.remove('cartel');
             gesto = null;
-            esperar(0.6, decidir);
+            esperar(0.3, decidir);
         });
     }
 
@@ -333,58 +326,54 @@
         if (!enSuelo) { decidir(); return; }
         saltar(1180);
         giroVel = 760 * (mira > 0 ? 1 : -1);
-        esperar(1.5, function () { giroVel = 0; esperar(0.5, decidir); });
+        esperar(1.1, function () { giroVel = 0; esperar(0.25, decidir); });
     }
 
     function decidir() {
         var dado = Math.random();
         var sitio = mundo.length ? alAzar(mundo) : null;
 
-        if (dado < 0.12) {
+        if (dado < 0.1) {
             // Sacar el cartel y mandar a escribirle a Gian.
             sacarCartel();
 
-        } else if (dado < 0.26) {
+        } else if (dado < 0.24) {
             // Voltereta, a veces con carrerita antes.
             if (Math.random() < 0.5) {
                 irA(Math.random() * (window.innerWidth - an), true, voltereta);
             } else voltereta();
 
-        } else if (sitio && dado < 0.46) {
+        } else if (sitio && dado < 0.36) {
             // Treparse encima de una tarjeta y caminar por el borde.
             var entrada = (x < sitio.x1) ? sitio.x1 + 20 : sitio.x2 - an - 20;
             irA(entrada, true, function () {
                 saltar(Math.min(1500, 700 + (window.innerHeight - sitio.arriba - MARGEN) * 2.2));
-                esperar(1.2, function () {
+                esperar(0.7, function () {
                     if (plataforma) {
                         irA(sitio.x1 + Math.random() * Math.max(30, sitio.x2 - sitio.x1 - an), false, function () {
-                            esperar(0.9, function () { saltar(720); esperar(1.4, decidir); });
+                            esperar(0.4, function () { saltar(720); esperar(0.6, decidir); });
                         });
                     } else decidir();
                 });
             });
 
-        } else if (sitio && dado < 0.62) {
+        } else if (sitio && dado < 0.74) {
             // Meterse detras de una tarjeta y asomar el casco.
             esconderseTras(sitio);
 
-        } else if (dado < 0.78) {
+        } else if (dado < 0.92) {
             // Cruzar corriendo de lado a lado.
             var lejos = (x < window.innerWidth / 2) ? window.innerWidth - an * 1.3 : an * 0.3;
             irA(lejos, true, function () {
                 if (Math.random() < 0.5) voltereta();
-                else { saltar(1050); esperar(1.2, decidir); }
-            });
-
-        } else if (dado < 0.9) {
-            // Pasear tranquilo.
-            irA(Math.random() * (window.innerWidth - an), false, function () {
-                esperar(1 + Math.random() * 2, decidir);
+                else { saltar(1050); esperar(0.6, decidir); }
             });
 
         } else {
-            // Quedarse quieto, mirando.
-            esperar(1.5 + Math.random() * 2.5, decidir);
+            // Pasear tranquilo, pero sin quedarse plantado.
+            irA(Math.random() * (window.innerWidth - an), false, function () {
+                esperar(0.4 + Math.random() * 0.5, decidir);
+            });
         }
     }
 
@@ -401,7 +390,7 @@
                     escondite = null;
                     gesto = null;
                     saltar(1100);
-                    esperar(1.3, decidir);
+                    esperar(0.5, decidir);
                 });
             });
         });
@@ -443,10 +432,10 @@
                 irA(meta2, true, function () {
                     gesto = 'senala';
                     decir(paso.texto, 4400);
-                    esperar(4.4, decidir);
+                    esperar(3.4, decidir);
                 });
             } else decidir();
-        }, 420);
+        }, 260);
     }, { passive: true });
 
     var tabla = document.getElementById('cartel');
@@ -467,11 +456,6 @@
         esperar(1.5, function () { giroVel = 0; decidir(); });
     });
 
-    if (cerrar) cerrar.addEventListener('click', function () {
-        corriendo = false;
-        mascota.remove();
-        try { localStorage.setItem(APAGADA, '1'); } catch (e) {}
-    });
 
     window.addEventListener('resize', function () {
         an = mascota.offsetWidth || an;
@@ -654,7 +638,7 @@
         irA(window.innerWidth * 0.16, false, function () {
             gesto = 'saluda';
             decir(GUION[0].texto, 4200);
-            esperar(3.2, decidir);
+            esperar(1.6, decidir);
         });
     }, 1300);
 })();

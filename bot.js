@@ -111,7 +111,7 @@ async function elegirModelo(clave) {
 }
 
 // historial: [{ de: 'cliente'|'bot', texto: '...' }]
-async function responder(mensaje, historial = [], reintento = false) {
+async function responder(mensaje, historial = [], reintento = false, intentos = 0) {
     const clave = process.env.GEMINI_API_KEY;
     if (!clave) throw new Error('Falta la variable GEMINI_API_KEY');
 
@@ -147,6 +147,16 @@ async function responder(mensaje, historial = [], reintento = false) {
             console.log('[bot] modelo retirado, cambiando a:', sugerido[1]);
             modeloElegido = sugerido[1];
             return responder(mensaje, historial, true);
+        }
+
+        // 503 (modelo saturado) y 429 (demasiadas consultas) son pasajeros y
+        // salen seguido en el nivel gratuito. Sin reintentos, el cliente que
+        // escribe justo en ese momento se queda sin respuesta.
+        if ((r.status === 503 || r.status === 429) && intentos < 3) {
+            const espera = 1200 * (intentos + 1);
+            console.log(`[bot] ${r.status} de Gemini, reintentando en ${espera}ms`);
+            await new Promise(ok => setTimeout(ok, espera));
+            return responder(mensaje, historial, reintento, intentos + 1);
         }
 
         throw new Error('Gemini respondio ' + r.status + ': ' + detalle.slice(0, 300));

@@ -36,7 +36,18 @@ async function loadDataAndInit() {
 // cada una. Se piden a Cloudinary recortadas a 8 segundos y a 480px de ancho
 // (du_8): pasan de 2,6 MB a unos 220 KB cada una. El video entero, en calidad
 // buena, se sirve al abrir el modal.
+// Los videos del portafolio se sirven desde la propia web (carpeta /videos),
+// no desde Cloudinary: la cuenta de Cloudinary se desactivo y con ella se
+// cayeron todos los videos, y en el celular solo seguian viendose porque
+// estaban en cache. Cada video local tiene tres archivos: nombre.mp4 (el
+// completo, para el modal), nombre-clip.mp4 (8 s livianos, para la tarjeta)
+// y nombre.jpg (la portada).
+function esLocal(url) {
+    return typeof url === 'string' && url.indexOf('/videos/') === 0;
+}
+
 function versionLigera(url) {
+    if (esLocal(url)) return url.replace(/\.mp4$/i, '-clip.mp4');
     if (!url || url.indexOf('/video/upload/') === -1) return url;
     if (/\/upload\/(f_auto|f_mp4|q_auto|w_)/.test(url)) return url;
     return url.replace('/video/upload/', '/video/upload/f_auto,q_auto:eco,w_480,c_limit,du_8/');
@@ -47,6 +58,7 @@ function versionLigera(url) {
 // gira solo cada 4 segundos y en medio minuto habia descargado los 8 videos
 // enteros (11 MB) aunque el visitante solo estuviera leyendo la portada.
 function versionPoster(url) {
+    if (esLocal(url)) return url.replace(/\.mp4$/i, '.jpg');
     if (!url || url.indexOf('/video/upload/') === -1) return '';
     return url
         .replace('/video/upload/', '/video/upload/so_2,w_600,c_limit,q_auto/')
@@ -62,6 +74,7 @@ function versionPoster(url) {
 //      negro (parecia que habian "desaparecido").
 // Cloudinary convierte una sola vez y luego lo sirve desde su cache.
 function versionModal(url) {
+    if (esLocal(url)) return url;
     if (!url || url.indexOf('/video/upload/') === -1) return url;
     if (/\/upload\/(f_mp4|f_auto)/.test(url)) return url;
     return url.replace('/video/upload/', '/video/upload/f_mp4,vc_auto,q_auto,w_1280,c_limit/');

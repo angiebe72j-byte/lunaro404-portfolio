@@ -1,74 +1,65 @@
 [
-    {
-        "id": "1788761211524",
-        "title": "BARBERIA",
-        "artist": "FILO",
-        "bgColor": "#04f500",
-        "shazams": "PRESENCIA",
-        "videoUrl": "https://res.cloudinary.com/nxogwpqi/video/upload/v1788761210/lunaro404/qvqvns5tvwmndidw09zi.webm",
-        "mediaPublicId": "lunaro404/qvqvns5tvwmndidw09zi"
-    },
-    {
-        "id": "1788760762503",
-        "title": "POLLERIA",
-        "artist": "Brasa Real",
-        "bgColor": "#ff9500",
-        "shazams": "PRESENCIA",
-        "videoUrl": "https://res.cloudinary.com/nxogwpqi/video/upload/v1788761733/lunaro404/rwwvyl86yj9detvtdkqr.webm",
-        "mediaPublicId": "lunaro404/rwwvyl86yj9detvtdkqr"
-    },
-    {
-        "id": "2",
-        "title": "Kenshō",
-        "artist": "Restaurante · carta y reservas online",
-        "bgColor": "#7a5c12",
-        "shazams": "HTML · CSS · JavaScript",
-        "videoUrl": "https://res.cloudinary.com/nxogwpqi/video/upload/v1788901376/lunaro404/dyfgdr5rb5zdurjii7ct.webm",
-        "mediaPublicId": "lunaro404/dyfgdr5rb5zdurjii7ct"
-    },
-    {
-        "id": "5",
-        "title": "Sonrisa Elite",
-        "artist": "Clínica dental · captación de pacientes",
-        "bgColor": "#0f7d80",
-        "shazams": "HTML · CSS · JavaScript",
-        "videoUrl": "https://res.cloudinary.com/nxogwpqi/video/upload/v1788472524/lunaro404/cjhni4l3ud9u1dntjnw2.mp4",
-        "mediaPublicId": "lunaro404/cjhni4l3ud9u1dntjnw2"
-    },
-    {
-        "id": "4",
-        "title": "AETHER",
-        "artist": "Tienda de ropa · catálogo de temporada",
-        "bgColor": "#14332c",
-        "shazams": "React · Tailwind",
-        "videoUrl": "https://res.cloudinary.com/nxogwpqi/video/upload/v1788472528/lunaro404/t01wbjz2vix0syvjqyho.mp4",
-        "mediaPublicId": "lunaro404/t01wbjz2vix0syvjqyho"
-    },
-    {
-        "id": "1787958311463",
-        "title": "iStore",
-        "artist": "E-commerce · tienda de tecnología",
-        "bgColor": "#0a0a0a",
-        "shazams": "React · Node.js",
-        "videoUrl": "https://res.cloudinary.com/nxogwpqi/video/upload/v1788472531/lunaro404/sl18jup9cdh7po9o209l.mp4",
-        "mediaPublicId": "lunaro404/sl18jup9cdh7po9o209l"
-    },
-    {
-        "id": "6",
-        "title": "Aura Construcciones",
-        "artist": "Constructora · proyectos y contacto directo",
-        "bgColor": "#2f4356",
-        "shazams": "HTML · CSS · JavaScript",
-        "videoUrl": "https://res.cloudinary.com/nxogwpqi/video/upload/v1788472537/lunaro404/untposejhgdf1kfamynm.mp4",
-        "mediaPublicId": "lunaro404/untposejhgdf1kfamynm"
-    },
-    {
-        "id": "7",
-        "title": "Ink Society",
-        "artist": "Estudio de tatuajes · portafolio y citas",
-        "bgColor": "#4a2440",
-        "shazams": "React · Node.js",
-        "videoUrl": "https://res.cloudinary.com/nxogwpqi/video/upload/v1788472539/lunaro404/wtm5ns9hgwaznefxsae2.mp4",
-        "mediaPublicId": "lunaro404/wtm5ns9hgwaznefxsae2"
-    }
+  {
+    "id": "1788761211524",
+    "title": "BARBERIA",
+    "artist": "FILO",
+    "bgColor": "#04f500",
+    "shazams": "PRESENCIA",
+    "videoUrl": "/videos/barberia.mp4",
+    "mediaPublicId": "lunaro404/qvqvns5tvwmndidw09zi"
+  },
+  {
+    "id": "1788760762503",
+    "title": "POLLERIA",
+    "artist": "Brasa Real",
+    "bgColor": "#ff9500",
+    "shazams": "PRESENCIA",
+    "videoUrl": "/videos/polleria.mp4",
+    "mediaPublicId": "lunaro404/rwwvyl86yj9detvtdkqr"
+  },
+  {
+    "id": "2",
+    "title": "Kenshō",
+    "artist": "Restaurante · carta y reservas online",
+    "bgColor": "#7a5c12",
+    "shazams": "HTML · CSS · JavaScript",
+    "videoUrl": "/videos/kensho.mp4",
+    "mediaPublicId": "lunaro404/dyfgdr5rb5zdurjii7ct"
+  },
+  {
+    "id": "5",
+    "title": "Sonrisa Elite",
+    "artist": "Clínica dental · captación de pacientes",
+    "bgColor": "#0f7d80",
+    "shazams": "HTML · CSS · JavaScript",
+    "videoUrl": "/videos/sonrisa.mp4",
+    "mediaPublicId": "lunaro404/cjhni4l3ud9u1dntjnw2"
+  },
+  {
+    "id": "4",
+    "title": "AETHER",
+    "artist": "Tienda de ropa · catálogo de temporada",
+    "bgColor": "#14332c",
+    "shazams": "React · Tailwind",
+    "videoUrl": "/videos/aether.mp4",
+    "mediaPublicId": "lunaro404/t01wbjz2vix0syvjqyho"
+  },
+  {
+    "id": "1787958311463",
+    "title": "iStore",
+    "artist": "E-commerce · tienda de tecnología",
+    "bgColor": "#0a0a0a",
+    "shazams": "React · Node.js",
+    "videoUrl": "/videos/istore.mp4",
+    "mediaPublicId": "lunaro404/sl18jup9cdh7po9o209l"
+  },
+  {
+    "id": "6",
+    "title": "Aura Construcciones",
+    "artist": "Constructora · proyectos y contacto directo",
+    "bgColor": "#2f4356",
+    "shazams": "HTML · CSS · JavaScript",
+    "videoUrl": "/videos/aura.mp4",
+    "mediaPublicId": "lunaro404/untposejhgdf1kfamynm"
+  }
 ]

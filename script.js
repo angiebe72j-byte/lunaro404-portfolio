@@ -117,8 +117,8 @@ function initRoulette() {
             `;
         } else if (data.videoUrl) {
             mediaHtml = `
-                <div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 16px; position: relative; background: ${data.bgColor}; cursor: pointer;" onclick="openVideoModal('${data.videoUrl}')">
-                    <video class="cell-video" preload="metadata" poster="${versionPoster(data.videoUrl)}" src="${versionLigera(data.videoUrl)}" data-original="${data.videoUrl}" onerror="if(this.src!==this.dataset.original){this.src=this.dataset.original;}" style="width: 100%; height: 100%; object-fit: cover;" loop muted playsinline></video>
+                <div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 16px; position: relative; background: #000; cursor: pointer;" onclick="openVideoModal('${data.videoUrl}')">
+                    <video class="cell-video" preload="metadata" poster="${versionPoster(data.videoUrl)}" src="${versionLigera(data.videoUrl)}" data-original="${data.videoUrl}" onerror="if(this.src!==this.dataset.original){this.src=this.dataset.original;}" style="width: 100%; height: 100%; object-fit: cover; position: relative;" loop muted playsinline></video>
                     <div style="position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.1); transition: background 0.3s;" onmouseover="this.style.background='rgba(0,0,0,0.4)'" onmouseout="this.style.background='rgba(0,0,0,0.1)'">
                         <svg viewBox="0 0 24 24" fill="white" style="width: 50px; height: 50px; opacity: 0.8; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));"><path d="M8 5v14l11-7z"/></svg>
                     </div>
@@ -148,18 +148,6 @@ function initRoulette() {
             </div>
         `;
         carousel.appendChild(cell);
-
-        // Si el video no es panorámico (cuadrado, vertical, etc.), mostrarlo
-        // completo en vez de recortarlo para llenar el marco 16:9
-        const cellVideo = cell.querySelector('.cell-video');
-        if (cellVideo) {
-            cellVideo.addEventListener('loadedmetadata', () => {
-                const aspect = cellVideo.videoWidth / cellVideo.videoHeight;
-                if (aspect < 1.55) { // 16/9 ≈ 1.78; por debajo de eso ya no es panorámico
-                    cellVideo.style.objectFit = 'contain';
-                }
-            });
-        }
 
         // Dot
         const dot = document.createElement('div');

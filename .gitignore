@@ -6,6 +6,10 @@ netstat_output.txt
 # Los videos pesan mucho y los administras seguido desde el panel admin;
 # en producción viven en el disco persistente de Render, no en git.
 uploads/
-barberia.mp4
+# Con barra delante: solo el archivo suelto de la raiz. Sin ella, el patron
+# valia en cualquier carpeta y se llevaba tambien videos/barberia.mp4, que si
+# hace falta en produccion: su modal quedaba en negro con "Format error"
+# porque el servidor devolvia la pagina 404 en vez del video.
+/barberia.mp4
 filo/
 visitas.jsonl

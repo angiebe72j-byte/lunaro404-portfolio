@@ -731,7 +731,7 @@ document.addEventListener('click', function (e) {
     padre.set(el, a);
   });
   var tomadas = new Set();
-  var ADELANTE = movil ? 2.2 : 1.8;
+  var ADELANTE = movil ? 1.15 : 1.1;
   function elegir(c){
     var mejor = null, dist = Infinity, lim = innerHeight * ADELANTE;
     for (var j = 0; j < todas.length; j++) {

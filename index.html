@@ -573,9 +573,10 @@ document.addEventListener('click', function (e) {
 <style>
 #bld-layer{position:absolute;left:0;top:0;width:100%;overflow:hidden;pointer-events:none;z-index:60}
 #bld-veil{position:fixed;inset:0;background:#05030f;z-index:59;transition:opacity .6s}
-.bc{position:absolute;left:0;top:0;will-change:transform}
+.bc{position:absolute;left:0;top:0;will-change:transform;z-index:2}
 .bc svg{display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,.45))}
-.bc span{position:absolute;left:16px;top:20px;font:600 12px/1 Inter,sans-serif;color:#fff;padding:5px 8px;border-radius:0 8px 8px 8px;white-space:nowrap;transition:opacity .3s}
+.bc span{position:absolute;left:16px;top:20px;font:600 11px/1 Inter,sans-serif;color:#fff;padding:5px 8px;border-radius:0 8px 8px 8px;white-space:nowrap;transition:opacity .3s}
+.bc span em{font-style:normal;opacity:.8;font-weight:500}
 .bc.lo span{opacity:0}
 .bc.clk svg{animation:bclk .25s}
 @keyframes bclk{50%{transform:scale(.75)}}
@@ -583,9 +584,12 @@ document.addEventListener('click', function (e) {
 .bbox i{position:absolute;width:7px;height:7px;background:#fff;border:1.5px solid;border-color:inherit}
 .bbox i:nth-child(1){left:-4px;top:-4px}.bbox i:nth-child(2){right:-4px;top:-4px}
 .bbox i:nth-child(3){left:-4px;bottom:-4px}.bbox i:nth-child(4){right:-4px;bottom:-4px}
-.bw{opacity:0}
+.bbox b{position:absolute;left:-1px;top:-20px;font:600 10px/1 Inter,sans-serif;color:#fff;padding:3px 5px;border-radius:3px;white-space:nowrap}
+.bw{opacity:0!important}
 .bin{animation:bin .55s cubic-bezier(.2,.8,.2,1) both}
+.bpop{animation:bpop .5s cubic-bezier(.3,1.5,.5,1) both}
 @keyframes bin{from{opacity:0;clip-path:inset(0 100% 100% 0)}to{opacity:1;clip-path:inset(0 0 0 0)}}
+@keyframes bpop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
 .btyp::after{content:"";display:inline-block;width:2px;height:.9em;margin-left:2px;background:currentColor;vertical-align:-.1em;animation:bcar .5s steps(1) infinite}
 @keyframes bcar{50%{opacity:0}}
 </style>
@@ -593,19 +597,11 @@ document.addEventListener('click', function (e) {
 (function(){
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var movil = innerWidth < 760;
-  var GRUPOS = [
-    ['nav', '.logo, nav li, nav > .btn'],
-    ['.slider', '.slide.on .lap, .slide.on .cel, .slide.on .txt > *'],
-    ['.cli', 'h2, .mq'],
-    ['#servicios', '.kicker, h2, :scope > p, .orb-card'],
-    ['#portafolio', 'h2, .sub, .feat-logo, .feat-txt .tag, .feat-txt h3, .feat-txt p, .duo figure, .pi'],
-    ['#software', '.tag, h2, p, ul, small, .btn'],
-    ['#planes', 'h2, :scope > p, .ph, .plan, .foot'],
-    ['#contacto', 'h2, .btn, .tt']
-  ];
-  var NOMBRES = ['Gian','Diseño','Código','IA','Fotos','Textos','SEO','Colores'];
-  var COLORES = ['#8b5cff','#ff3d9a','#3ee8ff','#ffb020','#2ee88a','#ff6b3d','#4d7cff','#e84dff'];
-  var N = movil ? 5 : 8, V = movil ? .75 : 1;
+  var SECCIONES = ['nav', '.slider', '.cli', '#servicios', '#portafolio', '#software', '#planes', '#contacto'];
+  var ATOMICOS = '.mq, svg, video, .dots';
+  var NOMBRES = ['Gian','Diseño','Código','IA','Fotos','Textos','SEO','Colores','Layout','Botones'];
+  var COLORES = ['#8b5cff','#ff3d9a','#3ee8ff','#ffb020','#2ee88a','#ff6b3d','#4d7cff','#e84dff','#c6ff3d','#ff4d6d'];
+  var N = movil ? 8 : 10, V = movil ? 1 : 1.25;
   var espera = function(ms){ return new Promise(function(r){ setTimeout(r, ms * V); }); };
 
   var capa = document.createElement('div'); capa.id = 'bld-layer';
@@ -614,13 +610,16 @@ document.addEventListener('click', function (e) {
   function alto(){ capa.style.height = document.documentElement.scrollHeight + 'px'; }
   alto(); addEventListener('resize', alto);
 
+  // Pausa el carrusel mientras se arma la portada
+  try { clearInterval(t); } catch (e) {}
+
   // Cursores
   var cur = [];
   for (var k = 0; k < N; k++) {
     var c = document.createElement('div'); c.className = 'bc lo';
-    c.innerHTML = '<svg width="22" height="26" viewBox="0 0 20 24"><path d="M2 2v18l5-5 4 8 3-1-4-8h7z" fill="' + COLORES[k] + '" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg><span style="background:' + COLORES[k] + '">' + NOMBRES[k] + '</span>';
+    c.innerHTML = '<svg width="22" height="26" viewBox="0 0 20 24"><path d="M2 2v18l5-5 4 8 3-1-4-8h7z" fill="' + COLORES[k] + '" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg><span style="background:' + COLORES[k] + '">' + NOMBRES[k] + '<em></em></span>';
     capa.appendChild(c);
-    cur.push({ el: c, color: COLORES[k], x: 0, y: 0, cola: Promise.resolve() });
+    cur.push({ el: c, em: c.querySelector('em'), color: COLORES[k], x: 0, y: 0 });
   }
   function poner(c, x, y, ms){
     c.x = x; c.y = y;
@@ -628,98 +627,143 @@ document.addEventListener('click', function (e) {
     c.el.style.transform = 'translate(' + x + 'px,' + y + 'px)';
     return espera(ms || 0);
   }
+  function hace(c, txt){ c.em.textContent = txt ? ' · ' + txt : ''; }
+  function clic(c){ c.el.classList.remove('clk'); void c.el.offsetWidth; c.el.classList.add('clk'); }
   function abs(el){ var r = el.getBoundingClientRect(); return { x: r.left + scrollX, y: r.top + scrollY, w: r.width, h: r.height, r: r }; }
 
-  // Ocultar todo lo que se va a construir
-  var secciones = GRUPOS.map(function(g){
-    var s = document.querySelector(g[0]); if (!s) return null;
-    var items = [].filter.call(s.querySelectorAll(g[1]), function(el){ return el.offsetParent !== null || el.closest('nav'); });
-    items = items.filter(function(el){ return !items.some(function(o){ return o !== el && o.contains(el); }); });
-    items.forEach(function(el){ el.classList.add('bw'); });
-    return { s: s, items: items };
+  // Qué piezas se construyen: cajas con fondo/borde, textos, imágenes, iconos
+  function textoPropio(el){ return [].some.call(el.childNodes, function(n){ return n.nodeType === 3 && n.textContent.trim(); }); }
+  function visual(el){
+    var s = getComputedStyle(el);
+    return !/^(rgba\(0, 0, 0, 0\)|transparent)$/.test(s.backgroundColor) || s.backgroundImage !== 'none' || parseFloat(s.borderTopWidth) > 0 || parseFloat(s.borderBottomWidth) > 0 || s.boxShadow !== 'none';
+  }
+  function piezas(sec){
+    var out = [];
+    (function rec(el, nivel){
+      [].forEach.call(el.children, function(h){
+        if (h.offsetWidth < 4 || h.offsetHeight < 4) return;
+        if (h.closest('.slide') && !h.closest('.slide.on')) return;
+        var media = /^(IMG|VIDEO|svg|BUTTON|I)$/.test(h.tagName);
+        var atom = h.matches(ATOMICOS);
+        var toma = media || atom || textoPropio(h) || visual(h);
+        if (toma) out.push({ el: h, nivel: nivel });
+        if (!atom && h.tagName !== 'svg') rec(h, toma ? nivel + 1 : nivel);
+      });
+    })(sec, 0);
+    return out;
+  }
+  var datos = SECCIONES.map(function(sel){
+    var s = document.querySelector(sel); if (!s) return null;
+    var p = piezas(s);
+    if (sel === 'nav') p.unshift({ el: s, nivel: -1 });
+    p.forEach(function(x){ x.el.classList.add('bw'); });
+    return { s: s, p: p };
   }).filter(Boolean);
 
-  function mostrar(el){
+  function mostrar(el, pop){
     if (!el.classList.contains('bw')) return;
-    el.classList.remove('bw'); el.classList.add('bin');
-    el.addEventListener('animationend', function(){ el.classList.remove('bin'); }, { once: true });
+    var cls = pop ? 'bpop' : 'bin';
+    el.classList.remove('bw'); el.classList.add(cls);
+    el.addEventListener('animationend', function(){ el.classList.remove(cls); }, { once: true });
   }
   function escribible(el){
-    return el.children.length === 0 && /^(H2|H3|H4|SPAN|DIV|FIGCAPTION)$/.test(el.tagName) && el.textContent.trim().length > 0 && el.textContent.length < 70;
+    return el.children.length === 0 && el.textContent.trim().length > 0 && el.textContent.length < 160;
   }
 
   function construir(c, el){
     if (!el.classList.contains('bw')) return Promise.resolve();
     var p = abs(el);
-    if (p.r.bottom < -50 || p.r.top > innerHeight + 50 || p.w === 0) { mostrar(el); return Promise.resolve(); }
-    return poner(c, p.x + 4, p.y + 4, 420).then(function(){
-      if (escribible(el)) {
-        var txt = el.textContent, i = 0, paso = Math.max(18, Math.min(45, 650 / txt.length));
-        c.el.classList.remove('clk'); void c.el.offsetWidth; c.el.classList.add('clk');
+    if (p.r.bottom < -40) { mostrar(el); return Promise.resolve(); }
+    if (p.r.top > innerHeight - 30) return espera(200).then(function(){ return construir(c, el); });
+    var esMedia = /^(IMG|VIDEO|svg|I)$/.test(el.tagName) || el.matches('.mq');
+    hace(c, '');
+    return poner(c, p.x + 4, p.y + 4, 380 + Math.random() * 200).then(function(){
+      if (escribible(el) && !esMedia) {
+        // Escribe letra por letra
+        var txt = el.textContent, i = 0, paso = Math.max(12, Math.min(55, 1100 / txt.length));
+        hace(c, 'escribiendo'); clic(c);
+        el.style.minHeight = p.h + 'px';
         el.textContent = ''; el.classList.add('btyp'); el.classList.remove('bw');
-        poner(c, p.x + p.w, p.y + 4, txt.length * paso);
+        poner(c, p.x + Math.min(p.w, txt.length * 9), p.y + p.h - 6, txt.length * paso);
         return new Promise(function(fin){
           (function letra(){
-            el.textContent = txt.slice(0, ++i);
-            if (i < txt.length) setTimeout(letra, paso * V); else { el.classList.remove('btyp'); fin(); }
+            i += txt.length > 60 ? 2 : 1;
+            el.textContent = txt.slice(0, i);
+            if (i < txt.length) setTimeout(letra, paso * V);
+            else { el.textContent = txt; el.classList.remove('btyp'); el.style.minHeight = ''; hace(c, ''); fin(); }
           })();
         });
       }
-      // Dibuja el recuadro de selección arrastrando
+      // Dibuja el recuadro arrastrando y suelta la pieza
+      hace(c, esMedia ? 'imagen' : 'dibujando');
       var b = document.createElement('div'); b.className = 'bbox';
-      b.innerHTML = '<i></i><i></i><i></i><i></i>';
+      b.innerHTML = '<i></i><i></i><i></i><i></i><b style="background:' + c.color + '"></b>';
       b.style.cssText = 'border-color:' + c.color + ';background:' + c.color + '14;transform:translate(' + p.x + 'px,' + p.y + 'px);width:0;height:0';
       capa.insertBefore(b, capa.firstChild);
+      var med = b.querySelector('b'); med.textContent = Math.round(p.w) + ' × ' + Math.round(p.h);
       void b.offsetWidth;
-      var ms = Math.min(650, 300 + (p.w + p.h) / 4);
-      b.style.transition = 'width ' + ms * V + 'ms cubic-bezier(.55,.05,.3,1),height ' + ms * V + 'ms cubic-bezier(.55,.05,.3,1),opacity .35s';
+      var ms = Math.min(800, 320 + (p.w + p.h) / 3);
+      var cb = 'cubic-bezier(.55,.05,.3,1)';
+      b.style.transition = 'width ' + ms * V + 'ms ' + cb + ',height ' + ms * V + 'ms ' + cb + ',opacity .35s';
       b.style.width = p.w + 'px'; b.style.height = p.h + 'px';
       return poner(c, p.x + p.w, p.y + p.h, ms).then(function(){
-        c.el.classList.remove('clk'); void c.el.offsetWidth; c.el.classList.add('clk');
-        mostrar(el);
-        setTimeout(function(){ b.style.opacity = 0; setTimeout(function(){ b.remove(); }, 400); }, 350);
-        return espera(120);
-      });
+        clic(c); mostrar(el, esMedia);
+        setTimeout(function(){ b.style.opacity = 0; setTimeout(function(){ b.remove(); }, 400); }, 300);
+        return espera(150);
+      }).then(function(){ hace(c, ''); });
     });
   }
 
-  var siguiente = 0;
-  function armarSeccion(sec){
-    var pend = sec.items.filter(function(el){ return el.classList.contains('bw'); });
-    pend.sort(function(a, b){ var ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect(); return ra.top - rb.top || ra.left - rb.left; });
-    pend.forEach(function(el){
-      var c = cur[siguiente++ % N];
-      c.cola = c.cola.then(function(){ return construir(c, el); });
-    });
-    // Por si algo queda sin construir
-    setTimeout(function(){ pend.forEach(mostrar); }, 9000);
+  // Construye una sección por capas: primero las cajas, luego lo de adentro
+  var rr = 0;
+  function armar(sec){
+    var niveles = {};
+    sec.p.forEach(function(x){ (niveles[x.nivel] = niveles[x.nivel] || []).push(x.el); });
+    var orden = Object.keys(niveles).map(Number).sort(function(a, b){ return a - b; });
+    return orden.reduce(function(prom, n){
+      return prom.then(function(){
+        var lista = niveles[n].filter(function(el){ return el.classList.contains('bw'); });
+        lista.sort(function(a, b){ var ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect(); return ra.top - rb.top || ra.left - rb.left; });
+        var colas = cur.map(function(){ return []; });
+        lista.forEach(function(el){ colas[rr++ % N].push(el); });
+        return Promise.all(colas.map(function(cola, k){
+          return cola.reduce(function(pr, el){ return pr.then(function(){ return construir(cur[k], el); }); }, Promise.resolve());
+        }));
+      });
+    }, Promise.resolve());
   }
 
   // 1) Cursores girando en círculo como "cargando"
-  var cx = innerWidth / 2, cy = innerHeight / 2 + scrollY, R = movil ? 38 : 52, t0 = performance.now(), DUR = 1700;
-  (function girar(t){
-    var dt = t - t0;
+  var cx = innerWidth / 2, cy = innerHeight / 2 + scrollY, R = movil ? 44 : 60, t0 = performance.now(), DUR = 2000;
+  (function girar(tt){
+    var dt = tt - t0;
     cur.forEach(function(c, k){
       var a = k / N * Math.PI * 2 + dt / 260;
       poner(c, cx + Math.cos(a) * R - 4, cy + Math.sin(a) * R - 4, 0);
-      c.el.style.opacity = .35 + .65 * (k / N);
+      c.el.style.opacity = .3 + .7 * (k / N);
     });
     if (dt < DUR) requestAnimationFrame(girar); else arrancar();
   })(t0);
 
-  // 2) Se separan y construyen lo que se ve; lo demás se arma al bajar
+  // 2) Se separan y construyen; cada sección se arma cuando llegas a ella
   function arrancar(){
     cur.forEach(function(c){ c.el.style.opacity = 1; c.el.classList.remove('lo'); });
     velo.style.opacity = 0; setTimeout(function(){ velo.remove(); }, 700);
+    var fila = Promise.resolve();
     var obs = new IntersectionObserver(function(es){
       es.forEach(function(e){
         if (!e.isIntersecting) return;
         obs.unobserve(e.target);
-        secciones.forEach(function(sec){ if (sec.s === e.target) armarSeccion(sec); });
+        datos.forEach(function(sec){
+          if (sec.s !== e.target) return;
+          fila = fila.then(function(){ return armar(sec); }).then(function(){
+            if (sec.s.matches('.slider')) { try { ir(i); } catch (e) {} }
+            alto();
+          });
+        });
       });
-    }, { threshold: 0, rootMargin: '0px 0px -20% 0px' });
-    secciones.forEach(function(sec){ obs.observe(sec.s); });
-    setTimeout(alto, 1500);
+    }, { threshold: 0, rootMargin: '0px 0px -25% 0px' });
+    datos.forEach(function(sec){ obs.observe(sec.s); });
   }
 })();
 </script>

@@ -579,6 +579,8 @@ document.addEventListener('click', function (e) {
 .bc span em{font-style:normal;opacity:.8;font-weight:500}
 .bc.lo span{opacity:0}
 .bc.clk svg{animation:bclk .25s}
+.bond{position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;border:2.5px solid;border-radius:50%;animation:bond .55s ease-out forwards}
+@keyframes bond{from{transform:scale(.2);opacity:1}to{transform:scale(1.4);opacity:0}}
 @keyframes bclk{50%{transform:scale(.75)}}
 .bbox{position:absolute;left:0;top:0;border:1.5px solid;border-radius:2px;transition:opacity .35s}
 .bbox i{position:absolute;width:7px;height:7px;background:#fff;border:1.5px solid;border-color:inherit}
@@ -628,7 +630,12 @@ document.addEventListener('click', function (e) {
     return espera(ms || 0);
   }
   function hace(c, txt){ c.em.textContent = txt ? ' · ' + txt : ''; }
-  function clic(c){ c.el.classList.remove('clk'); void c.el.offsetWidth; c.el.classList.add('clk'); }
+  function clic(c){
+    c.el.classList.remove('clk'); void c.el.offsetWidth; c.el.classList.add('clk');
+    var o = document.createElement('div'); o.className = 'bond';
+    o.style.cssText = 'left:' + (c.x + 3) + 'px;top:' + (c.y + 3) + 'px;border-color:' + c.color;
+    capa.appendChild(o); setTimeout(function(){ o.remove(); }, 600);
+  }
   function abs(el){ var r = el.getBoundingClientRect(); return { x: r.left + scrollX, y: r.top + scrollY, w: r.width, h: r.height, r: r }; }
 
   // Qué piezas se construyen: cajas con fondo/borde, textos, imágenes, iconos
@@ -674,7 +681,7 @@ document.addEventListener('click', function (e) {
     if (!el.classList.contains('bw')) return Promise.resolve();
     var p = abs(el);
     if (p.r.bottom < -40) { mostrar(el); return Promise.resolve(); }
-    if (p.r.top > innerHeight - 30) return espera(200).then(function(){ return construir(c, el); });
+    if (p.r.top > innerHeight * 1.6) return espera(200).then(function(){ return construir(c, el); });
     var esMedia = /^(IMG|VIDEO|svg|I)$/.test(el.tagName) || el.matches('.mq');
     hace(c, '');
     return poner(c, p.x + 4, p.y + 4, 300 + Math.random() * 150).then(function(){
@@ -699,7 +706,7 @@ document.addEventListener('click', function (e) {
       var b = document.createElement('div'); b.className = 'bbox';
       b.innerHTML = '<i></i><i></i><i></i><i></i><b style="background:' + c.color + '"></b>';
       b.style.cssText = 'border-color:' + c.color + ';background:' + c.color + '14;transform:translate(' + p.x + 'px,' + p.y + 'px);width:0;height:0';
-      capa.insertBefore(b, capa.firstChild);
+      capa.insertBefore(b, capa.firstChild); clic(c);
       var med = b.querySelector('b'); med.textContent = Math.round(p.w) + ' × ' + Math.round(p.h);
       void b.offsetWidth;
       var ms = Math.min(800, 320 + (p.w + p.h) / 3);
@@ -762,7 +769,7 @@ document.addEventListener('click', function (e) {
           });
         });
       });
-    }, { threshold: 0, rootMargin: '0px 0px -25% 0px' });
+    }, { threshold: 0, rootMargin: '0px 0px 80% 0px' });
     datos.forEach(function(sec){ obs.observe(sec.s); });
   }
 })();

@@ -601,7 +601,7 @@ document.addEventListener('click', function (e) {
   var ATOMICOS = '.mq, svg, video, .dots';
   var NOMBRES = ['Gian','Diseño','Código','IA','Fotos','Textos','SEO','Colores','Layout','Botones'];
   var COLORES = ['#8b5cff','#ff3d9a','#3ee8ff','#ffb020','#2ee88a','#ff6b3d','#4d7cff','#e84dff','#c6ff3d','#ff4d6d'];
-  var N = movil ? 8 : 10, V = movil ? 1 : 1.25;
+  var N = movil ? 8 : 10, V = movil ? .5 : .6;
   var espera = function(ms){ return new Promise(function(r){ setTimeout(r, ms * V); }); };
 
   var capa = document.createElement('div'); capa.id = 'bld-layer';
@@ -677,10 +677,10 @@ document.addEventListener('click', function (e) {
     if (p.r.top > innerHeight - 30) return espera(200).then(function(){ return construir(c, el); });
     var esMedia = /^(IMG|VIDEO|svg|I)$/.test(el.tagName) || el.matches('.mq');
     hace(c, '');
-    return poner(c, p.x + 4, p.y + 4, 380 + Math.random() * 200).then(function(){
+    return poner(c, p.x + 4, p.y + 4, 300 + Math.random() * 150).then(function(){
       if (escribible(el) && !esMedia) {
         // Escribe letra por letra
-        var txt = el.textContent, i = 0, paso = Math.max(12, Math.min(55, 1100 / txt.length));
+        var txt = el.textContent, i = 0, paso = Math.max(12, Math.min(40, 600 / txt.length));
         hace(c, 'escribiendo'); clic(c);
         el.style.minHeight = p.h + 'px';
         el.textContent = ''; el.classList.add('btyp'); el.classList.remove('bw');
@@ -734,7 +734,7 @@ document.addEventListener('click', function (e) {
   }
 
   // 1) Cursores girando en círculo como "cargando"
-  var cx = innerWidth / 2, cy = innerHeight / 2 + scrollY, R = movil ? 44 : 60, t0 = performance.now(), DUR = 2000;
+  var cx = innerWidth / 2, cy = innerHeight / 2 + scrollY, R = movil ? 44 : 60, t0 = performance.now(), DUR = 1200;
   (function girar(tt){
     var dt = tt - t0;
     cur.forEach(function(c, k){

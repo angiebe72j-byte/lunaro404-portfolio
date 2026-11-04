@@ -697,8 +697,8 @@ document.addEventListener('click', function (e) {
 @keyframes btag{0%{opacity:0;margin-top:6px}15%{opacity:1;margin-top:0}75%{opacity:1}100%{opacity:0;margin-top:-8px}}
 .bsel{background:rgba(212,42,51,.35)!important;outline:1px solid rgba(212,42,51,.6)}
 .bghost{position:absolute!important;margin:0!important;pointer-events:none;z-index:8;opacity:.75;outline:2px dashed rgba(255,255,255,.5);box-shadow:0 30px 60px rgba(0,0,0,.7)!important}
-.logo.bglow{animation:bglow 1.4s ease-out}
-@keyframes bglow{0%{filter:none}25%{filter:drop-shadow(0 0 14px #d42a33) drop-shadow(0 0 30px rgba(212,42,51,.8));transform:scale(1.08)}100%{filter:none;transform:none}}
+.logo.bglow{display:inline-block;animation:bglow .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes bglow{0%{filter:none;transform:none}35%{filter:drop-shadow(0 0 14px #d42a33) drop-shadow(0 0 30px rgba(212,42,51,.8));transform:scale(1.22)}100%{filter:none;transform:none}}
 </style>
 <script>
 (function(){
@@ -991,11 +991,11 @@ document.addEventListener('click', function (e) {
     var logo = document.querySelector('nav .logo');
     var gap = movil ? 22 : 30;
     function ruta(){
-      var w = innerWidth, h = innerHeight, pts = [], filas = movil ? 4 : 5;
-      for (var f = 0; f < filas; f++) {
-        var y = h * (.9 - f * (.62 / (filas - 1)));
-        var a = f % 2 ? [w * .08, w * .92] : [w * .92, w * .08];
-        pts.push([a[0], y], [a[1], y]);
+      // Gusanito jugando: da vueltas y rizos por toda la pantalla
+      var w = innerWidth, h = innerHeight, pts = [], T = Math.PI * 4;
+      for (var t = 0; t <= T; t += .04) {
+        pts.push([w * (.5 + .38 * Math.sin(1.5 * t + .3) * (.75 + .25 * Math.cos(t * .5))),
+                  h * (.56 + .3 * Math.sin(2 * t) * (.8 + .2 * Math.sin(t * .7)))]);
       }
       var r = logo.getBoundingClientRect();
       pts.push([r.left + r.width / 2, r.top + r.height / 2]);
@@ -1009,11 +1009,18 @@ document.addEventListener('click', function (e) {
       }
       var u = pts[pts.length - 1]; return [u[0], u[1], true];
     }
+    // Cada cursor que entra hace latir el logo: pum
+    function pum(c){
+      logo.classList.remove('bglow'); void logo.offsetWidth; logo.classList.add('bglow');
+      var r = logo.getBoundingClientRect(), o = document.createElement('div');
+      o.className = 'bond'; o.style.cssText = 'left:' + (r.left + r.width / 2 + scrollX) + 'px;top:' + (r.top + r.height / 2 + scrollY) + 'px;border-color:#d42a33;width:60px;height:60px;margin:-30px 0 0 -30px';
+      capa.appendChild(o); setTimeout(function(){ o.remove(); }, 600);
+    }
     function largo(pts){ var t = 0; for (var k = 1; k < pts.length; k++) t += Math.hypot(pts[k][0]-pts[k-1][0], pts[k][1]-pts[k-1][1]); return t; }
     var s0 = (N - 1) * gap, pts = ruta();
     var reunir = cur.map(function(c, k){ var q = punto(pts, Math.max(0, s0 - k * gap)); return poner(c, q[0] + scrollX, q[1] + scrollY, 900); });
     Promise.all(reunir).then(function(){
-      var vel = largo(pts) / (movil ? 3200 : 3800), t0 = performance.now(), dentro = 0;
+      var vel = largo(pts) / (movil ? 5200 : 6000), t0 = performance.now(), dentro = 0;
       (function paso(tt){
         pts = ruta();
         var s = s0 + (tt - t0) * vel;
@@ -1027,7 +1034,7 @@ document.addEventListener('click', function (e) {
             c.dentro = 1; dentro++;
             c.el.style.transition = 'transform .3s, opacity .3s';
             c.el.style.transform += ' scale(.2)'; c.el.style.opacity = 0;
-            logo.classList.remove('bglow'); void logo.offsetWidth; logo.classList.add('bglow');
+            pum(c);
           }
         });
         if (dentro < N) requestAnimationFrame(paso);
